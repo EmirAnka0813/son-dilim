@@ -28,7 +28,7 @@ const URL = process.argv[2] || 'http://127.0.0.1:8790/index.html';
 
   // --- 2) Oyuna basla ---
   await page.click('#pStart');
-  await page.waitForTimeout(900);
+  await page.waitForTimeout(2000);   // sahne kurulumu + isinma
   d = await page.evaluate(() => window.__dbg());
   check('Oyun basladi (play)', d.state === 'play', d.state);
   check('Bölüm 1 ofis', d.stage === 0, 'stage=' + d.stage);
@@ -36,12 +36,14 @@ const URL = process.argv[2] || 'http://127.0.0.1:8790/index.html';
   check('3 can var', d.lives === 3, 'lives=' + d.lives);
   check('Hediye tasiniyor', d.hasGift === true, String(d.hasGift));
 
-  // --- 3) Kosma ---
+  // --- 3) Kosma --- (kamera sifirlanir: test izolasyonu)
+  await page.evaluate(() => window.__setCamYaw(0));
+  await page.waitForTimeout(500);
   const x0 = d.x;
-  await page.keyboard.down('KeyD');
-  await page.waitForTimeout(1500);
+  await page.evaluate(() => window.__key('KeyD', true));
+  await page.waitForTimeout(2000);
   const mid = await page.evaluate(() => window.__dbg());
-  await page.keyboard.up('KeyD');
+  await page.evaluate(() => window.__key('KeyD', false));
   d = mid;
   // NOT: headless test ortaminda FPS dusuk (yazilim rasterizasyonu) -> simule
   // edilen sure gercek zamandan az olur. Bu yuzden HIZ ve GROUNDED kontrol
@@ -64,9 +66,11 @@ const URL = process.argv[2] || 'http://127.0.0.1:8790/index.html';
   check('2snde belirgin ilerleme', simT > 4, simT.toFixed(2) + ' birim');
 
   // --- 4) DENGE MEKANIGI: Roblox tarzi Q/E ile pasta egilir ---
+  await page.evaluate(() => window.__setCamYaw(0));
+  await page.waitForTimeout(400);
   const b0 = d.balance;
   await page.evaluate(() => window.__key('KeyE', true));
-  await page.waitForTimeout(1600);
+  await page.waitForTimeout(2000);
   const bE = await page.evaluate(() => window.__dbg().balance);
   await page.evaluate(() => window.__key('KeyE', false));
   check('Q/E pastayi egdiriyor', bE > b0 + 0.15, `balance ${b0} -> ${bE}`);
