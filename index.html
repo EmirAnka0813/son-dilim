@@ -1,0 +1,1364 @@
+<!DOCTYPE html>
+<html lang="tr">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width,initial-scale=1">
+<link rel="icon" href="data:image/svg+xml,<svg xmlns=%22http://www.w3.org/2000/svg%22 viewBox=%220 0 32 32%22><text y=%2226%22 font-size=%2226%22>🎂</text></svg>">
+<title>SON DİLİM — 10 Yaşına Giren Can İçin</title>
+<style>
+  :root{
+    --pink:#ff5ab0; --pink-l:#ff9ad0; --gold:#ffd24a; --cyan:#22e0ff;
+    --ink:#fff8fd; --dim:rgba(255,248,253,.62);
+    --panel:rgba(18,12,34,.9); --edge:rgba(255,255,255,.13);
+    --ok:#5ef2a0; --bad:#ff5f56;
+    --font:'Segoe UI Black','Segoe UI',system-ui,-apple-system,sans-serif;
+  }
+  *{margin:0;padding:0;box-sizing:border-box}
+  html,body{width:100%;height:100%;overflow:hidden;background:#0a0716;color:var(--ink);
+    font-family:'Segoe UI',system-ui,-apple-system,sans-serif;-webkit-font-smoothing:antialiased}
+  canvas#c{display:block;width:100%;height:100%;position:fixed;inset:0}
+
+  /* ── HUD ───────────────────────────────── */
+  #hud{position:fixed;inset:0;z-index:10;pointer-events:none;font-family:var(--font)}
+  .glass{background:var(--panel);border:1px solid var(--edge);backdrop-filter:blur(10px);
+    border-radius:14px;box-shadow:0 8px 30px rgba(0,0,0,.45)}
+
+  /* Süre — sağ üst */
+  #timer{position:absolute;top:18px;right:18px;padding:11px 18px;min-width:132px;text-align:center}
+  #timeVal{font-size:38px;font-weight:800;line-height:1;letter-spacing:1px;font-variant-numeric:tabular-nums}
+  #timeLbl{font-size:11px;letter-spacing:2.6px;color:var(--dim);margin-top:3px;font-family:'Segoe UI',system-ui,sans-serif;font-weight:600}
+  #timer.warn #timeVal{color:var(--gold)}
+  #timer.crit #timeVal{color:var(--bad);animation:pulse .55s infinite alternate}
+  @keyframes pulse{to{transform:scale(1.09);text-shadow:0 0 26px rgba(255,95,86,.85)}}
+
+  /* Denge barı — alt orta */
+  #balance{position:absolute;bottom:22px;left:50%;transform:translateX(-50%);
+    width:290px;height:22px;padding:0;overflow:hidden}
+  #balTrack{position:absolute;inset:4px 10px;border-radius:9px;background:rgba(255,255,255,.09)}
+  #balSafe{position:absolute;top:4px;bottom:4px;left:38%;width:24%;border-radius:8px;
+    background:rgba(94,242,160,.13);border:1px solid rgba(94,242,160,.28)}
+  #balDot{position:absolute;top:3px;left:50%;width:16px;height:16px;margin-left:-8px;border-radius:50%;
+    background:var(--gold);box-shadow:0 0 14px rgba(255,210,74,.85);transition:background .15s}
+  #balDot.bad{background:var(--bad);box-shadow:0 0 16px rgba(255,95,86,.9)}
+  #balLbl{position:absolute;top:26px;left:0;right:0;text-align:center;font-size:10px;
+    letter-spacing:2.4px;color:var(--dim);font-family:'Segoe UI',system-ui,sans-serif;font-weight:600}
+
+  /* Can / hediye — sol üst */
+  #left{position:absolute;top:18px;left:18px;display:flex;gap:10px;align-items:center}
+  #lives{display:flex;gap:5px;padding:10px 13px}
+  .lv{width:15px;height:15px}
+  #giftIco{width:34px;height:34px;padding:7px;display:none}
+  #stage{position:absolute;top:66px;left:18px;padding:8px 14px;font-size:13px;
+    letter-spacing:1.4px;color:var(--pink-l);font-weight:700}
+
+  /* Mesaj / ipucu — üst orta */
+  #toast{position:absolute;top:96px;left:50%;transform:translateX(-50%) translateY(-14px);
+    padding:12px 22px;font-size:16px;font-weight:700;opacity:0;transition:all .3s;
+    max-width:min(620px,80vw);text-align:center;letter-spacing:.3px}
+  #toast.show{opacity:1;transform:translateX(-50%) translateY(0)}
+
+  /* Yön tuşları */
+  #prompt{position:absolute;bottom:64px;left:50%;transform:translateX(-50%);font-size:13px;
+    color:var(--dim);letter-spacing:1.6px;text-align:center;font-family:'Segoe UI',system-ui,sans-serif;font-weight:600}
+  kbd{display:inline-block;padding:2px 8px;margin:0 3px;border-radius:5px;background:rgba(255,255,255,.1);
+    border:1px solid var(--edge);border-bottom-width:2px;font-family:var(--font);font-size:12px;color:var(--ink)}
+
+  /* ★ mini-pano (Can'ın fotoğrafları) */
+  #board{position:absolute;right:18px;bottom:18px;padding:9px;display:flex;gap:7px}
+  #board img{width:52px;height:69px;object-fit:cover;border-radius:7px;opacity:.85;
+    border:1px solid var(--edge);transition:.2s}
+  #board img:hover{opacity:1;transform:scale(1.07)}
+
+  /* ── Ekranlar ─────────────────────────── */
+  .screen{position:fixed;inset:0;z-index:20;display:flex;flex-direction:column;
+    align-items:center;justify-content:center;gap:20px;text-align:center;padding:26px;
+    background:radial-gradient(ellipse at 50% 38%,rgba(46,14,72,.8),rgba(5,3,14,.96));
+    backdrop-filter:blur(4px);overflow-y:auto}
+  .screen.hidden{display:none}
+  .title{font-family:var(--font);font-size:clamp(46px,9vw,104px);font-weight:800;line-height:.92;
+    background:linear-gradient(150deg,#ffd0e8,#ff5ab0 45%,#a855f7);
+    -webkit-background-clip:text;background-clip:text;color:transparent;
+    filter:drop-shadow(0 8px 30px rgba(255,90,176,.5))}
+  .sub{font-family:var(--font);font-size:clamp(15px,2.4vw,22px);font-weight:700;letter-spacing:4px;color:var(--gold)}
+  .story{max-width:660px;font-size:16px;line-height:1.7;color:rgba(255,248,253,.87)}
+  .story b{color:var(--gold)}
+  .story .who{color:var(--cyan);font-weight:700}
+  .cta{padding:13px 32px;border-radius:999px;font-family:var(--font);font-weight:900;font-size:18px;
+    letter-spacing:.6px;border:0;cursor:pointer;color:#fff;pointer-events:auto;
+    background:linear-gradient(135deg,var(--pink),#a855f7);
+    box-shadow:0 12px 34px rgba(255,90,176,.36);transition:.18s}
+  .cta:hover{transform:translateY(-2px);box-shadow:0 16px 42px rgba(255,90,176,.5)}
+  .cta.ghost{background:rgba(255,255,255,.09);box-shadow:none;border:1px solid var(--edge)}
+  .row{display:flex;gap:12px;flex-wrap:wrap;justify-content:center}
+
+  /* Prologue — telefon */
+  #phone{width:min(360px,86vw);border-radius:30px;padding:16px;background:#0d0a18;
+    border:7px solid #221a33;box-shadow:0 26px 70px rgba(0,0,0,.65);margin-bottom:6px}
+  #phoneHead{display:flex;align-items:center;gap:9px;margin-bottom:11px;padding-bottom:10px;
+    border-bottom:1px solid rgba(255,255,255,.08)}
+  #phoneHead .av{width:32px;height:32px;border-radius:50%;background:linear-gradient(135deg,var(--pink),#a855f7);
+    display:flex;align-items:center;justify-content:center;font-weight:800;font-size:14px;font-family:var(--font)}
+  #phoneHead .nm{font-size:14px;font-weight:700}
+  #phoneHead .tm{font-size:11px;color:var(--dim);margin-left:auto}
+  #sms{background:var(--pink);color:#fff;padding:11px 13px;border-radius:15px 15px 15px 4px;
+    font-size:14.5px;line-height:1.5;margin-bottom:9px;animation:pop .4s ease}
+  #sms2{background:rgba(255,255,255,.12);color:var(--ink);padding:11px 13px;border-radius:15px 15px 4px 15px;
+    font-size:14.5px;line-height:1.5}
+  @keyframes pop{from{opacity:0;transform:translateY(10px) scale(.96)}}
+
+  /* Final — aile tablosu */
+  #family{position:relative;width:min(620px,92vw);aspect-ratio:16/10;border-radius:18px;overflow:hidden;
+    border:6px solid #3a2b52;box-shadow:0 24px 60px rgba(0,0,0,.6);background:#120c20}
+  #famBg{position:absolute;inset:0;background:
+    radial-gradient(ellipse at 50% 120%,rgba(255,180,84,.4),transparent 62%),
+    linear-gradient(180deg,#2a1840,#160e28)}
+  .fam{position:absolute;bottom:9%;width:15%;text-align:center}
+  .fam .img{width:100%;aspect-ratio:3/4;border-radius:10px;overflow:hidden;border:2px solid rgba(255,255,255,.22);
+    box-shadow:0 8px 22px rgba(0,0,0,.5)}
+  .fam .img img{width:100%;height:100%;object-fit:cover}
+  .fam .nm{font-family:var(--font);font-size:clamp(10px,1.5vw,15px);font-weight:700;margin-top:5px;color:#fff}
+  #famTitle{position:absolute;top:6%;left:0;right:0;text-align:center;font-family:var(--font);
+    font-size:clamp(19px,3.4vw,34px);font-weight:800;color:var(--gold);
+    text-shadow:0 3px 18px rgba(0,0,0,.7)}
+
+  /* Krem sıçraması efekti */
+  #splat{position:fixed;inset:0;z-index:25;pointer-events:none;opacity:0;transition:opacity .25s;
+    background:
+      radial-gradient(circle at 22% 68%,#fff2f7 0 60px,transparent 62px),
+      radial-gradient(circle at 71% 41%,#ffd9ea 0 88px,transparent 90px),
+      radial-gradient(circle at 47% 84%,#fff 0 46px,transparent 48px),
+      radial-gradient(circle at 86% 78%,#ffe8f3 0 34px,transparent 36px),
+      radial-gradient(circle at 11% 33%,#ffd0e5 0 28px,transparent 30px)}
+  #splat.on{opacity:.96}
+
+  /* Final komik yazı */
+  #verdict{font-family:var(--font);font-size:clamp(20px,3.6vw,34px);font-weight:800}
+  #load{position:fixed;inset:0;z-index:40;display:flex;flex-direction:column;align-items:center;
+    justify-content:center;gap:16px;background:#0a0716}
+  #load.hidden{display:none}
+  #bar{width:250px;height:4px;border-radius:2px;background:rgba(255,255,255,.11);overflow:hidden}
+  #barFill{height:100%;width:0;background:linear-gradient(90deg,var(--cyan),var(--pink));transition:width .3s}
+</style>
+</head>
+<body>
+<canvas id="c"></canvas>
+<div id="splat"></div>
+
+<div id="hud">
+  <div id="left">
+    <div id="lives" class="glass"></div>
+    <div id="score" class="glass" style="padding:9px 14px;font-family:var(--font);font-weight:800;font-size:15px;letter-spacing:1px;color:var(--gold)">SKOR 0</div>
+    <div id="giftIco" class="glass" title="Hediye">
+      <svg viewBox="0 0 24 24" width="100%" height="100%"><path fill="#ff5ab0" d="M4 10h16v10H4z"/><path fill="#ff9ad0" d="M2 7h20v4H2z"/><path fill="#ffd24a" d="M11 7h2v13h-2z"/><path fill="#ffd24a" d="M12 7c-4 0-5-1.5-5-3 0-1 .8-1.6 1.6-1.4C10 3 11.4 4.6 12 7zm0 0c4 0 5-1.5 5-3 0-1-.8-1.6-1.6-1.4C14 3 12.6 4.6 12 7z"/></svg>
+    </div>
+  </div>
+  <div id="stage" class="glass">BÖLÜM 1 — OFİSTEN KAÇIŞ</div>
+  <div id="timer" class="glass"><div id="timeVal">20:00</div><div id="timeLbl">KALAN SÜRE</div></div>
+  <div id="balance" class="glass">
+    <div id="balTrack"></div><div id="balSafe"></div><div id="balDot"></div>
+    <div id="balLbl">PASTA DENGESİ</div>
+  </div>
+  <div id="toast" class="glass"></div>
+  <div id="prompt"></div>
+  <div id="board" class="glass"></div>
+</div>
+
+<!-- ═══ PROLOGUE ═══ -->
+<div class="screen" id="prologue">
+  <div class="sub">BÖLÜM 0</div>
+  <div class="title">SON DİLİM</div>
+  <div class="phone">
+    <div id="phoneHead">
+      <div class="av">A</div><div class="nm">Anne</div><div class="tm">18:42</div>
+    </div>
+    <div id="sms">Pastayı ve hediyeyi alıp hemen eve gel! Misafirler geldi, Derin mumları üfleyecek!</div>
+    <div id="sms2" style="display:none">YAA HAKKINDASIN! Ben şu an ofiste unuttum!!</div>
+  </div>
+  <p class="story">
+    İşe dalmışsın. Kardeşimin <b>10. yaş doğum günü</b> tamamen aklımdan çıkmış.<br>
+    Şimdi elinde <b>devasa, dengesiz bir pasta kutusu</b> ve son model bir hediye paketiyle
+    sokaktasın. Partiye <b>20 dakikan</b> var.<br>
+    <span class="who">Hedef:</span> pastayı ve hediyeyi sapasağlam eve ulaştır.
+  </p>
+  <button class="cta" id="pStart">SOKAĞA FIRLA!</button>
+</div>
+
+<!-- ═══ TITLE ═══ -->
+<div class="screen hidden" id="title">
+  <div class="title">SON DİLİM</div>
+  <div class="sub">SON DİLİM</div>
+  <p class="story" id="tMsg"></p>
+  <div class="row">
+    <button class="cta" id="tBtn">OYUNA BAŞLA</button>
+    <button class="cta ghost" id="tHow">NASIL OYNANIR?</button>
+  </div>
+  <div class="row" style="font-size:13px;color:var(--dim);gap:18px">
+    <span><kbd>W</kbd><kbd>A</kbd><kbd>S</kbd><kbd>D</kbd> koş</span>
+    <span><kbd>FARE</kbd> pastayı dengele</span>
+    <span><kbd>SPACE</kbd> zıpla</span>
+    <span><kbd>SHIFT</kbd> hızlı koş</span>
+  </div>
+</div>
+
+<!-- ═══ HOW TO ═══ -->
+<div class="screen hidden" id="how">
+  <div class="title" style="font-size:clamp(30px,5vw,54px)">NASIL OYNANIR</div>
+  <p class="story">
+    <b>Sol tuş:</b> pastayı iki elinle tut, <b>fareyi sağa sola hareket ettir</b> →
+    kutu sarsılır. Denge çubuğu yeşil bölgedeyken bırak.<br><br>
+    <b>Ok tuşları / WASD:</b> koş. <b>SHIFT:</b> daha hızlı (ama daha çok sarsılır).<br>
+    <b>SPACE:</b> zıpla (arabaların, boruların, rampaların üstünden atlamak için).<br><br>
+    <b>Engel:</b> kutu çarpışır, çevreye çarpar, köşeye sıkışırsa <b>krem kayar</b> →
+    denge çubuğu dolar → <b>PASTA KAZASI!</b> Son kontrol noktasına dönersin.<br><br>
+    <b>Süre:</b> sağ üstteki sayaç. Süre biterse kötü son, yetişirse iyi son.
+  </p>
+  <button class="cta" id="howBack">GERİ</button>
+</div>
+
+<!-- ═══ PAUSE ═══ -->
+<div class="screen hidden" id="pause">
+  <div class="title" style="font-size:clamp(34px,6vw,64px)">DURAKLATILDI</div>
+  <div class="row">
+    <button class="cta" id="pRes">DEVAM ET</button>
+    <button class="cta ghost" id="pRestart">BAŞTAN</button>
+  </div>
+</div>
+
+<!-- ═══ OVER ═══ -->
+<div class="screen hidden" id="over">
+  <div id="verdict" style="color:var(--bad)">PASTA KAZASI!</div>
+  <p class="story" id="oMsg"></p>
+  <div class="row">
+    <button class="cta" id="oBtn">TEKRAR DENE</button>
+    <button class="cta ghost" id="oTitle">ANA MENÜ</button>
+  </div>
+</div>
+
+<!-- ═══ WIN ═══ -->
+<div class="screen hidden" id="win">
+  <div id="verdict" style="color:var(--ok)">ZAMANINDA!</div>
+  <div id="family">
+    <div id="famBg"></div>
+    <div id="famTitle">İYİ Kİ DOĞDUN CAN!</div>
+    <div id="famRow" style="position:absolute;inset:0"></div>
+  </div>
+  <p class="story" id="wMsg"></p>
+  <div class="row">
+    <button class="cta" id="wBtn">TEKRAR OYNA</button>
+  </div>
+</div>
+
+<div id="load">
+  <div class="title" style="font-size:92px">SON DİLİM</div>
+  <div id="bar"><div id="barFill"></div></div>
+  <div style="font-size:12px;letter-spacing:3px;color:var(--dim)">HAZIRLANIYOR…</div>
+</div>
+
+<script type="module">
+import * as THREE from './lib/three.module.js';
+
+/* ══════════════════════════════════════════════════════════
+   SON DİLİM — 10 yaşına giren Can için
+   Mert: pasta kutusuyla eve koşuyor. Süre: 20 dakika.
+   ══════════════════════════════════════════════════════════ */
+
+const CFG = {
+  ad       : "DERİN",
+  sure     : 20*60,          // saniye
+  karakter : "Abla",         // pasta kutusunu taşıyan
+  iliski   : "ablam",        // "ablam" | "ağabeyim"
+  imza     : "Ablamdan"
+};
+
+const el = id => document.getElementById(id);
+
+/* ══════════════════════════════════════════════════════════
+   1. RENDERER / SAHNE
+   ══════════════════════════════════════════════════════════ */
+const canvas = el('c');
+const renderer = new THREE.WebGLRenderer({canvas, antialias:true, powerPreference:'high-performance'});
+renderer.setPixelRatio(Math.min(devicePixelRatio, 2));
+renderer.setSize(innerWidth, innerHeight);
+renderer.shadowMap.enabled = true;
+renderer.shadowMap.type = THREE.PCFSoftShadowMap;
+renderer.toneMapping = THREE.ACESFilmicToneMapping;
+renderer.toneMappingExposure = 1.35;
+renderer.outputColorSpace = THREE.SRGBColorSpace;
+
+const scene = new THREE.Scene();
+scene.fog = new THREE.FogExp2(0x3a2a5e, 0.0055);
+scene.background = new THREE.Color(0x2e2050);
+
+const camera = new THREE.PerspectiveCamera(60, innerWidth/innerHeight, 0.1, 800);
+
+/* ışıklar — separate add (chaining .position.set breaks) */
+const hemi = new THREE.HemisphereLight(0xdce8ff, 0x6b4a80, 1.5);
+scene.add(hemi);
+
+const sun = new THREE.DirectionalLight(0xfff2dc, 2.6);
+sun.position.set(-30, 46, 22);
+sun.castShadow = true;
+sun.shadow.mapSize.set(2048,2048);
+sun.shadow.camera.near = 1; sun.shadow.camera.far = 160;
+sun.shadow.camera.left = -55; sun.shadow.camera.right = 55;
+sun.shadow.camera.top = 55;   sun.shadow.camera.bottom = -55;
+sun.shadow.bias = -0.0008; sun.shadow.normalBias = 0.04;
+scene.add(sun);
+scene.add(sun.target);
+
+const rim = new THREE.DirectionalLight(0xff7ac4, 0.85);
+rim.position.set(24, 14, -26);
+scene.add(rim);
+
+/* ══════════════════════════════════════════════════════════
+   2. MALZEMELER
+   ══════════════════════════════════════════════════════════ */
+const M = {
+  asphalt : new THREE.MeshStandardMaterial({color:0x5a5478, roughness:0.92}),
+  sidewalk: new THREE.MeshStandardMaterial({color:0xb8b0d0, roughness:0.88}),
+  building: new THREE.MeshStandardMaterial({color:0x8d84b8, roughness:0.78}),
+  glass   : new THREE.MeshStandardMaterial({color:0x9fd8ff, roughness:0.12, metalness:0.5,
+             transparent:true, opacity:0.45}),
+  office  : new THREE.MeshStandardMaterial({color:0x6d6690, roughness:0.72}),
+  metal   : new THREE.MeshStandardMaterial({color:0xb8bcc8, roughness:0.35, metalness:0.8}),
+  dark    : new THREE.MeshStandardMaterial({color:0x3d3358, roughness:0.82}),
+  car1    : new THREE.MeshStandardMaterial({color:0xff5f56, roughness:0.35, metalness:0.35}),
+  car2    : new THREE.MeshStandardMaterial({color:0x22e0ff, roughness:0.35, metalness:0.35}),
+  car3    : new THREE.MeshStandardMaterial({color:0xffd24a, roughness:0.35, metalness:0.35}),
+  car4    : new THREE.MeshStandardMaterial({color:0x8b5cf6, roughness:0.35, metalness:0.35}),
+  skin    : new THREE.MeshStandardMaterial({color:0xf2c9a8, roughness:0.75}),
+  dress   : new THREE.MeshStandardMaterial({color:0xffb8d4, roughness:0.85}),
+  sock    : new THREE.MeshStandardMaterial({color:0xfff0f6, roughness:0.9}),
+  shoe    : new THREE.MeshStandardMaterial({color:0xf3c6cf, roughness:0.45, metalness:0.25}),
+  shirt   : new THREE.MeshStandardMaterial({color:0x2f6ea8, roughness:0.8}),
+  pants   : new THREE.MeshStandardMaterial({color:0x2b3145, roughness:0.85}),
+  hairM   : new THREE.MeshStandardMaterial({color:0x3b2a1c, roughness:0.6}),
+  hairF   : new THREE.MeshStandardMaterial({color:0x6b3f24, roughness:0.55}),
+  box     : new THREE.MeshStandardMaterial({color:0xc9a06a, roughness:0.9}),
+  cake    : new THREE.MeshStandardMaterial({color:0xffb3d9, roughness:0.6}),
+  cream   : new THREE.MeshStandardMaterial({color:0xfff6fb, roughness:0.7}),
+  candle  : new THREE.MeshStandardMaterial({color:0xffe6a3, emissive:0xffaa33, emissiveIntensity:1.8}),
+  gift    : new THREE.MeshStandardMaterial({color:0xff5ab0, roughness:0.35, metalness:0.2}),
+  ribbon  : new THREE.MeshStandardMaterial({color:0xffd24a, roughness:0.3, metalness:0.5,
+             emissive:0x6b4d00, emissiveIntensity:0.5}),
+  dog     : new THREE.MeshStandardMaterial({color:0x8a6440, roughness:0.85}),
+  veg1    : new THREE.MeshStandardMaterial({color:0xff6b4a, roughness:0.7}),
+  veg2    : new THREE.MeshStandardMaterial({color:0x5ec98a, roughness:0.7}),
+  veg3    : new THREE.MeshStandardMaterial({color:0xffd24a, roughness:0.7}),
+  skate   : new THREE.MeshStandardMaterial({color:0x22e0ff, roughness:0.4, metalness:0.3}),
+  pipe    : new THREE.MeshStandardMaterial({color:0xff9f43, roughness:0.55, metalness:0.25}),
+  cone    : new THREE.MeshStandardMaterial({color:0xff6b35, roughness:0.7}),
+  crowd   : new THREE.MeshStandardMaterial({color:0x6b5f8a, roughness:0.85})
+};
+
+/* ══════════════════════════════════════════════════════════
+   3. DÜNYA KURUCULAR
+   ══════════════════════════════════════════════════════════ */
+const world = {
+  solids:[], hazards:[], movers:[], checkpoints:[], goal:null,
+  crowd:[], cars:[], dogs:[], skaters:[], ramps:[], props:[]
+};
+
+function mesh(geo, mat, x,y,z, parent){
+  const m = new THREE.Mesh(geo, mat);
+  m.position.set(x,y,z);
+  m.castShadow = true; m.receiveShadow = true;
+  (parent||scene).add(m);
+  return m;
+}
+
+/* zemin parçası (çarpışmalı) */
+function floor(x, w, mat, y=0, depth=18){
+  const m = mesh(new THREE.BoxGeometry(w,0.6,depth), mat, x+w/2, y-0.3, 0);
+  world.solids.push({x, w, y, h:0.6, mesh:m, isFloor:true});
+  return m;
+}
+/* engel (çarpışma → kutu sarsılır) */
+function hazard(x,w,h,z,mat, label){
+  const m = mesh(new THREE.BoxGeometry(w,h,2.4), mat, x+w/2, h/2, z);
+  world.hazards.push({x,w,h,z,label:label||'engel',mesh:m});
+  return m;
+}
+function checkpoint(x, z=0){
+  const g = new THREE.Group();
+  const pole = mesh(new THREE.CylinderGeometry(0.08,0.08,4.2,8), M.dark, 0,2.1,0, g);
+  const flag = mesh(new THREE.PlaneGeometry(1.4,0.85,8,1),
+    new THREE.MeshStandardMaterial({color:0x5ef2a0, roughness:.5, emissive:0x1a5c36, emissiveIntensity:.8}),
+    0.7,3.6,0, g);
+  g.position.set(x,0,z);
+  scene.add(g);
+  world.checkpoints.push({g, flag, x, z, active:false});
+}
+function building(x,w,h,z,mat){
+  const m = mesh(new THREE.BoxGeometry(w,h,10), mat||M.building, x+w/2, h/2, z);
+  // pencere şeritleri
+  for(let i=0;i<Math.floor(h/3.2);i++){
+    mesh(new THREE.BoxGeometry(w*0.82,1.1,0.3), M.glass, x+w/2, 2.6+i*3.2, z+5.05);
+  }
+  return m;
+}
+
+/* ---------- KARAKTER: Abla (pembe elbise, uzun dalgalı saç) ---------- */
+function makeRunner(){
+  const g = new THREE.Group();
+  const skin = M.skin, dress = M.dress, hair = M.hairF;
+
+  // A elbise — belden genişleyen koni
+  const torso = mesh(new THREE.CylinderGeometry(0.30, 0.60, 1.30, 20), dress, 0, 1.02, 0, g);
+  const chest = mesh(new THREE.CylinderGeometry(0.30, 0.34, 0.42, 18), dress, 0, 1.52, 0, g);
+  const shoulders = mesh(new THREE.SphereGeometry(0.30, 16, 12), dress, 0, 1.68, 0, g);
+  shoulders.scale.set(1.15, 0.55, 0.80);
+
+  // kollar (pembe kısa kol → ten rengi önkollar)
+  const armLU = mesh(new THREE.CapsuleGeometry(0.095, 0.30, 4, 10), dress, -0.38, 1.52, 0, g);
+  const armRU = mesh(new THREE.CapsuleGeometry(0.095, 0.30, 4, 10), dress,  0.38, 1.52, 0, g);
+  const armL = mesh(new THREE.CapsuleGeometry(0.085, 0.52, 4, 10), skin, -0.42, 1.10, 0, g);
+  const armR = mesh(new THREE.CapsuleGeometry(0.085, 0.52, 4, 10), skin,  0.42, 1.10, 0, g);
+  const handL= mesh(new THREE.SphereGeometry(0.105, 10, 8), skin, -0.44, 0.80, 0, g);
+  const handR= mesh(new THREE.SphereGeometry(0.105, 10, 8), skin,  0.44, 0.80, 0, g);
+
+  // boyun + baş
+  const neck = mesh(new THREE.CylinderGeometry(0.09,0.11,0.16,10), skin, 0, 1.82, 0, g);
+  const head = mesh(new THREE.SphereGeometry(0.30, 22, 18), skin, 0, 2.08, 0, g);
+  head.scale.set(0.93, 1.06, 0.94);
+  const nose = mesh(new THREE.SphereGeometry(0.055, 8, 8), skin, 0, 2.05, 0.28, g);
+
+  // gözler + gülümseme
+  const eyeM = new THREE.MeshStandardMaterial({color:0x2b1a12, roughness:0.3});
+  for(const s of [-1,1]){
+    const eye = mesh(new THREE.SphereGeometry(0.048,12,10), eyeM, s*0.11, 2.12, 0.275, g);
+    const brow = mesh(new THREE.BoxGeometry(0.09,0.02,0.02), eyeM, s*0.11, 2.21, 0.275, g);
+  }
+  const mouth = mesh(new THREE.TorusGeometry(0.07,0.017,8,16,Math.PI),
+    new THREE.MeshStandardMaterial({color:0xb04a5a, roughness:0.5}), 0, 1.99, 0.28, g);
+  mouth.rotation.z = Math.PI;
+
+  /* SAÇ — uzun, dalgalı, omuzdan aşağı */
+  const cap = mesh(new THREE.SphereGeometry(0.315, 22, 16, 0, Math.PI*2, 0, Math.PI*0.60), hair, 0, 2.12, 0, g);
+  const fringe = mesh(new THREE.SphereGeometry(0.30, 20, 14, 0, Math.PI*2, 0, Math.PI*0.40), hair, 0, 2.20, 0.09, g);
+  fringe.scale.set(1.0, 0.72, 1.0);
+
+  const hairLock = (len, phase, mat)=>{
+    const grp = new THREE.Group();
+    const segs = Math.max(5, Math.round(len/0.20));
+    for(let i=0;i<segs;i++){
+      const t = i/segs;
+      const r = 0.19*(1 - t*0.55);
+      const seg = mesh(new THREE.SphereGeometry(r, 10, 8), mat,
+        Math.sin(t*7+phase)*0.085, -t*len, Math.cos(t*5+phase)*0.065 - t*0.10, grp);
+      seg.scale.set(1, 0.85, 1);
+    }
+    return grp;
+  };
+    for(let i=0;i<10;i++){
+    const a = (i/10)*Math.PI*2;
+    const lock = hairLock(1.45 + Math.sin(i*2.3)*0.30, i*1.7, hair);
+    lock.position.set(Math.cos(a)*0.25, 2.12, Math.sin(a)*0.23 - 0.06);
+    g.add(lock);
+  }
+  // arka at kuyruğu
+  const tail = hairLock(1.15, 2.2, hair);
+  tail.position.set(0, 2.16, -0.29);
+  tail.scale.setScalar(1.15);
+  g.add(tail);
+
+  /* ÇORAP + AYAKKABI (bastoncuk topuklu) */
+  for(const s of [-1,1]){
+    const leg = mesh(new THREE.CapsuleGeometry(0.082, 0.58, 4, 10), M.sock, s*0.15, 0.42, 0, g);
+    const shoeBody = mesh(new THREE.BoxGeometry(0.19, 0.13, 0.32), M.shoe, s*0.15, 0.08, 0.05, g);
+    const heel = mesh(new THREE.BoxGeometry(0.15, 0.17, 0.13), M.shoe, s*0.15, 0.03, -0.09, g);
+    const toe = mesh(new THREE.SphereGeometry(0.10, 12, 10), M.shoe, s*0.15, 0.08, 0.19, g);
+    toe.scale.set(1, 0.7, 1);
+  }
+
+  return {g, armL, armR, handL, handR, legL:null, legR:null, head, torso};
+}
+
+/* ---------- PASTA KUTUSU ---------- */
+function makeCakeBox(){
+    const g = new THREE.Group();
+  // kutu
+  const b = mesh(new THREE.BoxGeometry(0.92,0.42,0.72), M.box, 0,0,0, g);
+  // kapak
+    const lid = mesh(new THREE.BoxGeometry(0.96,0.05,0.76), M.cream, 0,0.24,0, g);
+  // pasta (kutu içinden taşan)
+    const cake = mesh(new THREE.CylinderGeometry(0.3,0.33,0.42,16), M.cake, 0,0.42,0, g);
+  const creamTop = mesh(new THREE.CylinderGeometry(0.31,0.29,0.1,16), M.cream, 0,0.66,0, g);
+  // mumlar
+    for(let i=0;i<10;i++){
+    const c = mesh(new THREE.CylinderGeometry(0.025,0.025,0.22,6), M.candle, -0.16+i*0.032,0.80,0, g);
+  }
+    // taçan krema lekeleri (denge bozulunca görünür)
+  const smear = mesh(new THREE.SphereGeometry(0.14,10,8), M.cream, 0.30,0.18,0.24, g);
+  smear.scale.set(1,0.6,1); smear.visible = false;
+
+    // hediye paketi (kol altı)
+  const gift = new THREE.Group();
+  mesh(new THREE.BoxGeometry(0.42,0.34,0.24), M.gift, 0,0,0, gift);
+  mesh(new THREE.BoxGeometry(0.44,0.06,0.26), M.ribbon, 0,0,0, gift);
+  mesh(new THREE.BoxGeometry(0.06,0.36,0.26), M.ribbon, 0,0,0, gift);
+  gift.position.set(0.60,-0.28,0.16);
+  gift.rotation.z = -0.24;
+  g.add(gift);
+
+    return {g, smear, gift, cake};
+}
+
+/* ══════════════════════════════════════════════════════════
+   4. BÖLÜMLER — hikâyedeki 4 bölüm + final
+   ══════════════════════════════════════════════════════════ */
+const STAGES = [
+  {ad:'BÖLÜM 1 — OFİSTEN KAÇIŞ',   tip:'ofis'},
+  {ad:'BÖLÜM 2 — TRAFİK CANAVARI', tip:'sokak'},
+  {ad:'BÖLÜM 3 — TOPLU TAŞIMA KABUSU', tip:'metro'},
+  {ad:'BÖLÜM 4 — SON YOKUŞ',        tip:'mahalle'},
+  {ad:'FİNAL — KAPIYA ZAMAN',       tip:'ev'}
+];
+
+let stageIdx = 0;
+let stageLen = 0;         // mevcut bölümün bitiş X'i
+let segStart = 0;
+
+function buildStage(idx){
+  // temizle
+  for(const s of world.solids) if(s.mesh) scene.remove(s.mesh);
+  for(const h of world.hazards) if(h.mesh) scene.remove(h.mesh);
+  for(const m of world.movers) if(m.g) scene.remove(m.g);
+  for(const c of world.checkpoints) if(c.g) scene.remove(c.g);
+  for(const c of world.crowd) if(c.g) scene.remove(c.g);
+  for(const c of world.cars) if(c.g) scene.remove(c.g);
+  for(const d of world.dogs) if(d.g) scene.remove(d.g);
+  for(const s of world.skaters) if(s.g) scene.remove(s.g);
+  world.solids.length=0; world.hazards.length=0; world.movers.length=0;
+  world.checkpoints.length=0; world.crowd.length=0; world.cars.length=0;
+  world.dogs.length=0; world.skaters.length=0; world.ramps.length=0;
+  for(const o of world.props) scene.remove(o);
+  world.props.length=0;
+  stageIdx = idx;
+  segStart = segStart===0 ? 0 : stageLen;
+  const tip = STAGES[idx].tip;
+
+  if(tip==='ofis')     buildOffice();
+  if(tip==='sokak')    buildStreet();
+  if(tip==='metro')    buildMetro();
+  if(tip==='mahalle')  buildNeighborhood();
+  if(tip==='ev')       buildHome();
+
+  el('stage').textContent = STAGES[idx].ad;
+}
+
+function buildOffice(){
+  const X = 0;
+  // ofis zemini
+  floor(X, 46, M.office, 0, 20);
+  // koridor duvarları
+  hazard(X, 1.2, 5, -8, M.building);
+  hazard(X+44.8, 1.2, 5, -8, M.building);
+  // ofis masaları (engel)
+  for(let i=0;i<6;i++){
+    const x = X + 5 + i*6;
+    mesh(new THREE.BoxGeometry(2.6,0.12,1.6), M.cream, x+1.3,1.0, -5);
+    mesh(new THREE.BoxGeometry(0.14,1.0,0.14), M.dark, x+0.3,0.5, -5);
+    mesh(new THREE.BoxGeometry(0.14,1.0,0.14), M.dark, x+2.3,0.5, -5);
+    mesh(new THREE.BoxGeometry(0.7,0.5,0.05), M.dark, x+1.3,1.35, -5.3);
+    world.hazards.push({x, w:2.6, h:1.4, z:-5, label:'masa'});
+  }
+  // kalabalık (ofiste çalışanlar)
+  for(let i=0;i<10;i++) addCrowd(X+8+Math.random()*36, -7+Math.random()*3, 0);  // kenarda
+  // asansör boşluğu — boşluk platformlarla atlanır
+  const gapX = X+20, gapW = 7;
+  // boşluğun iki yanı platform
+  // (zemin orada yok: iki parça yap)
+  world.solids = world.solids.filter(s=>!(s.x>=gapX && s.x<gapX+gapW));
+  floor(X, gapX, M.office, 0, 20);
+  floor(gapX+gapW, 46-gapX-gapW, M.office, 0, 20);
+  // atlama platformları (asansör kuyusu)
+  const p1 = mesh(new THREE.BoxGeometry(2.4,0.4,3), M.metal, gapX+1.2, 0.6, 0);
+  world.solids.push({x:gapX, w:2.4, y:0.8, h:0.4, isFloor:true});
+  const p2 = mesh(new THREE.BoxGeometry(2.0,0.4,3), M.metal, gapX+3.4, 1.4, 0);
+  world.solids.push({x:gapX+2.4, w:2.0, y:1.6, h:0.4, isFloor:true});
+  const p3 = mesh(new THREE.BoxGeometry(2.0,0.4,3), M.metal, gapX+5.6, 2.2, 0);
+  world.solids.push({x:gapX+5.2, w:2.0, y:2.4, h:0.4, isFloor:true});
+  // asansör kabini (hareketli, aşağı iner)
+  const cab = new THREE.Group();
+  mesh(new THREE.BoxGeometry(3.2,0.4,3.4), M.metal, 0,0,0, cab);
+  mesh(new THREE.BoxGeometry(3.2,2.4,0.12), M.glass, 0,1.2,-1.7, cab);
+  cab.position.set(gapX+1.4, 0.8, 0);
+  scene.add(cab);
+  world.movers.push({g:cab, x:gapX+1.4, y:0.8, ax:gapX+1.4, bx:gapX+1.4, spd:0, dir:1, dx:0, ox:gapX+1.4, w:3.2, platform:true});
+  // patron (risk)
+  const boss = addCrowd(gapX+12, 0, 1.2);
+  world.props.push(boss);
+  // kapı
+  mesh(new THREE.BoxGeometry(0.3,4,6), M.glass, X+46, 2, 0);
+  checkpoint(X+24, 0);
+  stageLen = 46;
+}
+
+function buildStreet(){
+  const X = stageLen - 4;   // onki bolumle overlap
+  floor(X, 120, M.asphalt, 0, 22);
+  // kaldırım
+  floor(X, 120, M.sidewalk, 0.25, 4);
+  // binalar
+  for(let i=0;i<9;i++){
+    const bx = X+6+i*13, h = 12+Math.random()*22;
+    building(bx, 11, h, -11);
+    building(bx, 11, h, 11);
+  }
+  // trafik — iki yönlü
+  const carMats=[M.car1,M.car2,M.car3,M.car4];
+    for(let i=0;i<10;i++){
+    const cx = X+8+i*12, lane = (i%2===0)? -3.4 : 3.4;
+    const dir = (i%2===0)? 1 : -1;
+    const car = new THREE.Group();
+    mesh(new THREE.BoxGeometry(4.2,1.0,1.9), carMats[i%4], 0,0.65,0, car);
+    mesh(new THREE.BoxGeometry(2.2,0.75,1.75), M.glass, -0.2,1.45,0, car);
+    for(const wx of [-1.4,1.4]) for(const wz of [-0.95,0.95])
+      mesh(new THREE.CylinderGeometry(0.42,0.42,0.28,10), M.dark, wx,0.42,wz, car).rotation.x=Math.PI/2;
+    car.position.set(cx,0,lane);
+    scene.add(car);
+    world.cars.push({g:car, dir, lane, speed: 9+Math.random()*7});
+  }
+  // ıslak zemin (kaygan bölge)
+  const wet = mesh(new THREE.PlaneGeometry(16,14), new THREE.MeshStandardMaterial({
+      color:0x2a3550, roughness:0.06, metalness:0.6, transparent:true, opacity:0.8}),
+      X+52,0.02,0);
+  wet.rotation.x=-Math.PI/2;
+  world.props.push(wet);
+  world.wet = {x:X+44, w:16};
+  // inşaat alanı — borular (üzerinden yürü)
+  const cx0 = X+70;
+  floor(cx0, 16, M.sidewalk, 0.3, 16);
+  for(let i=0;i<5;i++){
+    const px = cx0+2+i*3;
+    const pipe = mesh(new THREE.CylinderGeometry(0.4,0.4,12,12), M.pipe, px, 0.75, 0);
+    pipe.rotation.z = Math.PI/2;
+    world.solids.push({x:px-0.4, w:0.8, y:1.15, h:0.5});
+  }
+  // inşaat konileri
+  for(let i=0;i<6;i++){
+    const c = mesh(new THREE.ConeGeometry(0.32,0.9,8), M.cone, cx0+1+i*2.6, 0.75, 4);
+    world.props.push(c);
+  }
+  // sokak köpekleri
+  for(let i=0;i<4;i++) addDog(X+30+i*22, (Math.random()-0.5)*10);
+  // kontrol noktası
+  checkpoint(X+30, 0);
+  checkpoint(X+95, 0);
+  stageLen = X + 120;
+}
+
+function buildMetro(){
+  const X = stageLen - 4;
+  floor(X, 90, M.sidewalk, 0, 20);
+  // platform
+  mesh(new THREE.BoxGeometry(80,1.2,10), M.sidewalk, X+40, 0.6, 0);
+  world.solids.push({x:X, w:80, y:1.2, h:1.2});
+  // raylar
+  for(const rz of [-2.2, 2.2])
+    mesh(new THREE.BoxGeometry(80,0.18,0.18), M.metal, X+40, 0.1, rz);
+  // metrobüs (hareketli)
+  const bus = new THREE.Group();
+  mesh(new THREE.BoxGeometry(14,3.4,3.0), M.car2, 0,1.9,0, bus);
+  mesh(new THREE.BoxGeometry(13,1.3,2.9), M.glass, 0,2.7,0, bus);
+  for(const wx of [-5,0,5]) for(const wz of [-1.55,1.55])
+    mesh(new THREE.CylinderGeometry(0.5,0.5,0.32,10), M.dark, wx,0.5,wz, bus).rotation.x=Math.PI/2;
+  bus.position.set(X+18, 0, 4.2);
+  scene.add(bus);
+  world.movers.push({g:bus, x:X+18, y:0, ax:X+18, bx:X+18, spd:0, dir:1, dx:0, ox:X+18, w:14, bus:true});
+  // kalabalık dalgası (insanlar)
+  for(let i=0;i<26;i++) addCrowd(X+2+Math.random()*80, -2+Math.random()*8, 0);
+  // istasyon tabelası
+  mesh(new THREE.BoxGeometry(8,1.6,0.3), M.dark, X+42, 5.5, -8);
+  checkpoint(X+20, 0);
+  checkpoint(X+70, 0);
+  stageLen = X + 90;
+}
+
+function buildNeighborhood(){
+  const X = stageLen - 4;
+  floor(X, 110, M.asphalt, 0, 20);
+  // evler
+  for(let i=0;i<8;i++){
+    const hx = X+8+i*13;
+    const house = mesh(new THREE.BoxGeometry(9,6,8), M.building, hx+4.5,3,-8);
+    mesh(new THREE.BoxGeometry(9.4,0.6,8.4), M.cake, hx+4.5,6.2,-8);
+    for(let r=0;r<2;r++) for(let c=0;c<2;c++)
+      mesh(new THREE.BoxGeometry(1.4,1.4,0.2), M.glass, hx+1.6+c*3.2, 2+r*2.6, -3.95);
+  }
+  // yokuş (rampa) — son tırmanış
+  const ramp = mesh(new THREE.BoxGeometry(30,1.2,16), M.sidewalk, X+62, 1.6, 0);
+  ramp.rotation.z = -0.13;
+  world.solids.push({x:X+48, w:30, y:3.6, h:1.2, ramp:true});
+  // bakkal sebze kasaları
+  for(let i=0;i<9;i++){
+    const bx = X+18+i*3.4, bz = (Math.random()-0.5)*11;
+    const crate = mesh(new THREE.BoxGeometry(1.1,0.8,1.1), M.box, bx,0.7,bz);
+    const v = mesh(new THREE.SphereGeometry(0.26,10,8), [M.veg1,M.veg2,M.veg3][i%3], bx,1.2,bz);
+    world.hazards.push({x:bx-0.55,w:1.1,h:1.3,z:bz,label:'sebze kasası'});
+  }
+  // rakip çocuklar
+  for(let i=0;i<5;i++) addCrowd(X+22+i*14, (Math.random()-0.5)*10, 0.8);
+  // kaykaycılar (kaykay rampaları)
+  for(let i=0;i<3;i++){
+    const rx = X+34+i*24;
+    const r = mesh(new THREE.BoxGeometry(5,0.5,5), M.skate, rx,0.55,0);
+    r.rotation.z = 0.34;
+    world.solids.push({x:rx-2.5, w:5, y:1.1, h:0.5, ramp:true});
+    addSkater(rx, 0);
+  }
+  checkpoint(X+25, 0);
+  checkpoint(X+95, 0);
+  stageLen = X + 110;
+}
+
+function buildHome(){
+  const X = stageLen - 4;
+  floor(X, 40, M.sidewalk, 0, 20);
+  // kapi onu: oyuncu X+6'a gelir
+  // ev
+  const house = mesh(new THREE.BoxGeometry(14,9,12), M.cake, X+14,4.5,0);
+  mesh(new THREE.BoxGeometry(14.6,0.7,12.6), M.cream, X+14,9.3,0);
+  // kapı
+  const door = mesh(new THREE.BoxGeometry(0.3,3.4,2.2), M.dark, X+7.05,1.7,0);
+  // pencereler (içeriden ışık)
+  for(let r=0;r<2;r++) for(const ox of [3,10]){
+    const win = mesh(new THREE.BoxGeometry(2.2,2.2,0.2), new THREE.MeshStandardMaterial({
+        color:0xffe9a8, emissive:0xffcc55, emissiveIntensity:1.6, roughness:0.5}),
+        X+ox, 2.2+r*3.6, 6.05);
+  }
+  // bahçe ışıkları
+  for(let i=0;i<5;i++){
+    const l = new THREE.PointLight(0xffcc66, 14, 20, 2);
+    l.position.set(X+4+i*7, 4, 7);
+    scene.add(l);
+  }
+  checkpoint(X+2, 0);
+  world.goal = {x:X+6, z:0};
+  const goalLight = new THREE.PointLight(0xff5ab0, 40, 30, 2);
+  goalLight.position.set(X+6, 3, 0);
+  scene.add(goalLight);
+  stageLen = X + 40;
+}
+
+/* ---------- yardımcılar ---------- */
+function addCrowd(x,z,scale){
+  const g = new THREE.Group();
+  const body = mesh(new THREE.CylinderGeometry(0.32,0.38,1.15,10), M.crowd, 0,0.95,0, g);
+  const head = mesh(new THREE.SphereGeometry(0.25,12,10), M.skin, 0,1.75,0, g);
+  g.position.set(x,0,z);
+  g.scale.setScalar(scale||1);
+  scene.add(g);
+  const c = {g, base:x, speed: 1.5+Math.random()*2, dir:Math.random()<.5?-1:1, z};
+  world.crowd.push(c);
+  return g;
+}
+function addDog(x,z){
+  const g = new THREE.Group();
+  mesh(new THREE.BoxGeometry(0.8,0.5,0.35), M.dog, 0,0.42,0, g);
+  mesh(new THREE.SphereGeometry(0.22,10,8), M.dog, 0.5,0.55,0, g);
+  for(const lx of [-0.28,0.28]) for(const lz of [-0.14,0.14])
+    mesh(new THREE.CylinderGeometry(0.07,0.07,0.38,6), M.dog, lx,0.19,lz, g);
+  g.position.set(x,0,z);
+  scene.add(g);
+  world.dogs.push({g, home:x, dir:Math.random()<.5?-1:1, speed:4+Math.random()*3});
+}
+function addSkater(x,z){
+  const g = new THREE.Group();
+  mesh(new THREE.CapsuleGeometry(0.22,0.85,4,10), M.crowd, 0,0.95,0, g);
+  mesh(new THREE.SphereGeometry(0.22,12,10), M.skin, 0,1.62,0, g);
+  mesh(new THREE.BoxGeometry(0.16,0.1,0.9), M.skate, 0,0.12,0, g);
+  g.position.set(x,0,z);
+  scene.add(g);
+  world.skaters.push({g, dir:Math.random()<.5?-1:1, speed:7+Math.random()*4});
+}
+
+/* ══════════════════════════════════════════════════════════
+   5. OYUNCU
+   ══════════════════════════════════════════════════════════ */
+const runner = makeRunner();
+const cakeBox = makeCakeBox();
+runner.g.add(cakeBox.g);
+cakeBox.g.position.set(0, 1.42, 0.62);
+cakeBox.g.rotation.x = 0.08;
+scene.add(runner.g);
+
+const P = {
+  vel: new THREE.Vector3(),
+  yaw: 0,
+  grounded:true, coyote:0, buffer:0,
+  anim:0, speed:0,
+  hurtT:0,
+  balance:0,          // -1..1  (negatif sola, pozitif sağa eğilir)
+  balanceVel:0,
+  tilt:0,             // görsel dönüş
+  slip:0,             // krema kayma miktarı 0..1
+  hasCake:true,
+  hasGift:true
+};
+
+/* ══════════════════════════════════════════════════════════
+   6. GİRDİ
+   ══════════════════════════════════════════════════════════ */
+const keys = new Set();
+addEventListener('keydown', e=>{
+  if(['KeyW','KeyA','KeyS','KeyD','Space','ArrowUp','ArrowDown','ArrowLeft','ArrowRight'].includes(e.code)) e.preventDefault();
+  if(!keys.has(e.code)) onKey(e.code);
+  keys.add(e.code);
+});
+addEventListener('keyup', e=>keys.delete(e.code));
+addEventListener('blur', ()=>keys.clear());
+
+/* fare → denge (pasta sağa/sola savrulur) */
+let mx=0, my=0;
+canvas.addEventListener('mousemove', e=>{
+  const w = innerWidth/2, h = innerHeight/2;
+  mx = (e.clientX - w)/w;      // -1..1  -> pasta dengesi
+  my = (e.clientY - h)/h;      // -1..1  -> kamera pitch
+  cam.pitch = THREE.MathUtils.clamp(my*0.42, -0.85, 0.55);
+});
+canvas.addEventListener('mousedown', e=>{ if(e.button===0) P.buffer=0.16; });
+addEventListener('touchstart', e=>{
+  if(state==='play' && !e.target.closest('.cta')){
+    P.buffer=0.16;
+    const tx = e.touches[0].clientX/innerWidth*2-1;
+    mx = tx;
+  }
+}, {passive:true});
+
+/* ══════════════════════════════════════════════════════════
+   7. DURUMLAR
+   ══════════════════════════════════════════════════════════ */
+const State={LOAD:'load',PRO:'pro',TITLE:'title',PLAY:'play',PAUSE:'pause',OVER:'over',WIN:'win'};
+let state=State.LOAD;
+let timeLeft=CFG.sure, score=0, stageTime=0, panic=0, lives=3, shake=0;
+let started=false;
+
+function show(id){ ['prologue','title','how','pause','over','win'].forEach(s=>el(s).classList.toggle('hidden', s!==id)); }
+function toast(t, ms=2400){ el('toast').textContent=t; el('toast').classList.add('show'); clearTimeout(toast._t); toast._t=setTimeout(()=>el('toast').classList.remove('show'), ms); }
+
+function onKey(code){
+  if(code==='Escape' && state===State.PLAY){ pause(); return; }
+  if(state===State.PRO && (code==='Space'||code==='Enter')){ startGame(); return; }
+  if(state===State.TITLE && (code==='Space'||code==='Enter')){ startGame(); return; }
+  if(state===State.PLAY && code==='Space') P.buffer=0.16;
+  if(state===State.PAUSE && (code==='Escape'||code==='Space')) resume();
+  if(state===State.OVER && (code==='Space'||code==='KeyR')) startGame();
+  if(state===State.WIN && (code==='Space'||code==='KeyR')) toTitle();
+}
+function startGame(){
+  segStart=0; stageLen=0; buildStage(0);
+  timeLeft=CFG.sure; score=0; panic=0; stageTime=0; lives=3; shake=0;
+  P.balance=0; P.balanceVel=0; P.slip=0; P.hasCake=true; P.hasGift=true;
+  P.vel.set(0,0,0); P.grounded=true; P.yaw=0;
+  runner.g.position.set(6,0.02,0);
+  cakeBox.g.visible=true; cakeBox.smear.visible=false;
+  state=State.PLAY; started=true;
+  show(null);
+  toast('BÖLÜM 1 — Ofisten kaç! FARE ile pastası dengele.', 3400);
+  el('prompt').innerHTML='<kbd>A</kbd><kbd>D</kbd> koş · <kbd>FARE</kbd> dengele · <kbd>SPACE</kbd> zıpla · <kbd>SHIFT</kbd> hızlı';
+}
+function pause(){ if(state!==State.PLAY) return; state=State.PAUSE; show('pause'); }
+function resume(){ if(state!==State.PAUSE) return; state=State.PLAY; show(null); }
+function toTitle(){ state=State.TITLE; show('title'); el('tMsg').innerHTML=
+  `<b>${CFG.ad}</b>, ${CFG.sure/60} dakikan var. Pasta kutusu dengesiz, yol uzun.<br>
+   Bölümler: Ofis → Sokak → Metro → Yokuş → Kapı.`; }
+function gameOver(reason){
+  state=State.OVER; started=false;
+  el('verdict').textContent = reason==='cake' ? 'PASTA KAZASI!' : 'SÜRE BİTTİ!';
+  el('verdict').style.color = reason==='cake' ? 'var(--bad)' : 'var(--gold)';
+  el('oMsg').innerHTML = reason==='cake'
+    ? `Pasta kapının eşiğinde yere yapıştı. Her yer kremaya bulandı.<br>
+       <b>${CFG.ad}</b> dışarı çıktı, yere düşen pastaya ve perişan haldeki ${CFG.karakter}'ine baktı…`
+    : `Saat 19:00 oldu. Misafirler yemeye başladı, pasta hâlâ yolda.`;
+  show('over');
+  el('splat').classList.add('on');
+  setTimeout(()=>el('splat').classList.remove('on'), 1400);
+}
+function win(){
+  state=State.WIN; started=false;
+  const sc = score + Math.max(0, Math.floor(timeLeft)) * 10;
+  score = sc;
+  el('wMsg').innerHTML =
+    `Kapıyı tam zamanında açtın! <b>${CFG.karakter}</b> nefes nefese ama gülümsüyor.<br>
+     <b>${CFG.ad}</b> boynuna sarıldı: <i>"Hayatımın en iyi doğum günü!"</i><br>
+     Skor: <b>${score}</b> · Kalan süre: <b>${Math.floor(timeLeft/60)}:${String(Math.floor(timeLeft%60)).padStart(2,'0')}</b>`;
+  show('win');
+  buildFamily();
+}
+el('tBtn').onclick=startGame;
+el('pStart').onclick=startGame;
+el('pRes').onclick=resume;
+el('pRestart').onclick=startGame;
+el('oBtn').onclick=startGame;
+el('oTitle').onclick=toTitle;
+el('wBtn').onclick=startGame;
+el('tHow').onclick=()=>show('how');
+el('howBack').onclick=()=>show('title');
+
+/* ---------- aile tablosu (final) ---------- */
+function buildFamily(){
+  const row = el('famRow');
+  row.innerHTML='';
+  const people = [
+    {img:'assets/photos/can-1.jpg', nm:CFG.ad},
+    {img:'assets/photos/can-2.jpg', nm:'Abla'},
+    {img:'assets/photos/can-3.jpg', nm:'Anne'},
+    {img:'assets/photos/can-4.jpg', nm:'Baba'}
+  ];
+  people.forEach((p,i)=>{
+    const d = document.createElement('div');
+    d.className='fam';
+    d.style.left = (10+i*22)+'%';
+    d.innerHTML = `<div class="img"><img src="${p.img}" alt="${p.nm}"></div><div class="nm">${p.nm}</div>`;
+    row.appendChild(d);
+  });
+}
+
+/* ══════════════════════════════════════════════════════════
+   8. HUD
+   ══════════════════════════════════════════════════════════ */
+function buildHUD(){
+  el('lives').innerHTML='';
+  for(let i=0;i<3;i++){
+    const s=document.createElementNS('http://www.w3.org/2000/svg','svg');
+    s.setAttribute('viewBox','0 0 24 24'); s.classList.add('lv');
+    s.innerHTML='<path fill="#ff5ab0" d="M12 21s-8-5.3-8-11a4.6 4.6 0 018-3 4.6 4.6 0 018 3c0 5.7-8 11-8 11z"/>';
+    el('lives').appendChild(s);
+  }
+  const b=el('board'); b.innerHTML='';
+  for(let i=1;i<=4;i++){
+    const im=document.createElement('img');
+    im.src=`assets/photos/can-${i}.jpg`;
+    im.alt=`Can ${i}`;
+    b.appendChild(im);
+  }
+}
+let lastLives=3;
+function updateHUD(){
+  const m=Math.floor(timeLeft/60), s=Math.floor(timeLeft%60);
+  el('timeVal').textContent = m+':'+String(s).padStart(2,'0');
+  const tm=el('timer');
+  tm.classList.toggle('warn', timeLeft<300 && timeLeft>=120);
+  tm.classList.toggle('crit', timeLeft<120);
+  // denge
+  const pct = 50 + P.balance*46;
+  el('balDot').style.left = pct+'%';
+  el('balDot').classList.toggle('bad', Math.abs(P.balance)>0.72);
+  // can
+  if(lastLives!==3){}
+  [...el('lives').children].forEach((h,i)=>h.style.opacity = i<lives? 1 : .22);
+  el('giftIco').style.display = P.hasGift? 'block':'none';
+  el('score').textContent='SKOR '+score;
+}
+
+/* ══════════════════════════════════════════════════════════
+   9. FİZİK + DENGE MEKANİĞİ
+   ══════════════════════════════════════════════════════════ */
+function solidAt(x, z, yFeet){
+  for(const s of world.solids){
+    if(x+0.42>s.x && x-0.42<s.x+s.w && Math.abs((yFeet+0.42)-s.y)<0.5) return s;
+  }
+  return null;
+}
+
+function physics(dt){
+  const p = runner.g.position;
+
+  /* ---------- koşu ---------- */
+  let fwd=0, str=0;
+  if(keys.has('KeyW')||keys.has('ArrowUp'))    fwd+=1;
+  if(keys.has('KeyS')||keys.has('ArrowDown'))  fwd-=1;
+  if(keys.has('KeyA')||keys.has('ArrowLeft'))  str-=1;
+  if(keys.has('KeyD')||keys.has('ArrowRight')) str+=1;
+  const sprint = keys.has('ShiftLeft')||keys.has('ShiftRight');
+  const maxSpd = sprint? 15 : 10.5;
+
+  // YON: dunya koordinatinda. yaw=0 => +Z (ileri), yaw=PI/2 => +X (sag).
+  // Karakter yonu GIRDIDEN hesaplanir (yaw'a bakarak degil) -> daire cizmez.
+  const tx = str, tz = fwd;
+  const tl = Math.hypot(tx,tz);
+  if(tl>0.001){
+    const wx = tx/tl, wz = tz/tl;
+    const acc = P.grounded? 55 : 20;
+    P.vel.x += wx*acc*dt; P.vel.z += wz*acc*dt;
+    P.yaw = Math.atan2(wx,wz);   // karakter yeni yone doner
+  } else if(P.grounded){
+    const f=26*dt, m=Math.hypot(P.vel.x,P.vel.z);
+    if(m<=f){P.vel.x=0;P.vel.z=0;} else {P.vel.x-=P.vel.x/m*f; P.vel.z-=P.vel.z/m*f;}
+  }
+  const sp=Math.hypot(P.vel.x,P.vel.z);
+  if(sp>maxSpd){ P.vel.x=P.vel.x/sp*maxSpd; P.vel.z=P.vel.z/sp*maxSpd; }
+  P.speed=sp;
+
+  /* ---------- DENGE MEKANİĞİ (kutunun salınımı) ---------- */
+  // fare konumu hedef eğim; hareket de kutuya momentum katar
+  const target = mx;                                  // -1..1
+  // salınım doğal frekansı (sarkaç)
+  const k = 22, damp = 2.4;
+  // dış kuvvet: fare hedefi + koşu ivmesi + zıplama
+  const accelX = (P.vel.x - (P.velPrevX||0))/Math.max(dt,0.001);
+  const accelZ = (P.vel.z - (P.velPrevZ||0))/Math.max(dt,0.001);
+  P.velPrevX = P.vel.x; P.velPrevZ = P.vel.z;
+  const shakeForce = (target - P.balance)*k*0.55
+                   - (accelX*Math.cos(P.yaw) + accelZ*Math.sin(P.yaw))*0.055
+                   + (sprint? (Math.random()-0.5)*1.4 : (Math.random()-0.5)*0.5)
+                   + Math.sin(performance.now()*0.004)*0.35;
+  P.balanceVel += shakeForce*dt;
+  P.balanceVel -= P.balanceVel*damp*dt;
+  P.balance += P.balanceVel*dt;
+  P.balance = THREE.MathUtils.clamp(P.balance, -1.6, 1.6);
+
+  // krem kayması
+  const slipRate = Math.max(0, Math.abs(P.balance)-0.62) * 0.55;
+  P.slip = Math.min(1, P.slip + slipRate*dt);
+  if(P.slip >= 1) crash('cake');
+  if(P.slip > 0.06) cakeBox.smear.visible = true;
+  cakeBox.smear.scale.setScalar(0.6 + P.slip*1.5);
+
+  /* ---------- zıplama ---------- */
+  P.coyote-=dt; P.buffer-=dt;
+  if(P.grounded) P.coyote=0.13;
+  if(P.buffer>0 && P.coyote>0){
+    P.vel.y=13.5; P.buffer=0; P.coyote=0; P.grounded=false;
+    P.balanceVel += (Math.random()-0.5)*2.2;   // zıplama sarsar
+    sfx('jump');
+  }
+  const jumpHeld = keys.has('Space');
+  if(P.vel.y>0 && !jumpHeld) P.vel.y -= 24*dt;
+  P.vel.y += -34*dt;
+  P.vel.y = Math.max(P.vel.y,-46);
+
+  /* ---------- çarpışma ---------- */
+  P.grounded=false;
+  const half=0.42, feetY=0.42, hgt=1.7;
+
+  // X — yalnizca GERCEK engeller (zemin degil). Dikey test: govde engelin icinde mi?
+  p.x += P.vel.x*dt;
+  for(const s of world.solids){
+    if(s.isFloor) continue;
+    if(p.y+hgt>s.y && p.y<s.y+s.h && p.x+half>s.x && p.x-half<s.x+s.w){
+      if(p.x+half-s.x < s.x+s.w-(p.x-half)){
+        p.x = s.x-half; P.vel.x=0;
+      } else { p.x = s.x+s.w+half; P.vel.x=0; }
+      P.balanceVel += 1.6;
+    }
+  }
+  // Z
+  p.z += P.vel.z*dt;
+  for(const s of world.solids){
+    if(s.isFloor) continue;
+    if(p.y+hgt>s.y && p.y<s.y+s.h && p.x+half>s.x && p.x-half<s.x+s.w){
+      p.z = s.z !== undefined ? s.z : p.z;
+      P.vel.z = 0;
+    }
+  }
+  // Y
+  p.y += P.vel.y*dt;
+  for(const s of world.solids){
+    if(p.x+half>s.x && p.x-half<s.x+s.w && p.y+hgt>s.y && p.y<s.y+s.h){
+      // Zemin: ust yuzeye otur. Platform/duvar: ustune cik ya da altindan gec.
+      if(P.vel.y>0){ p.y=s.y+0.02; P.vel.y=0; P.grounded=true; }
+      else if(!s.isFloor){ p.y=s.y+s.h+feetY; P.vel.y=0; }
+      else { p.y=s.y+0.02; P.vel.y=0; P.grounded=true; }
+    }
+  }
+  // platform (hareketli)
+  for(const m of world.movers){
+    if(m.platform){
+      const top = m.y + (m.g.position.y - m.y);
+      if(p.x+half>m.g.position.x && p.x-half<m.g.position.x+m.w &&
+         Math.abs((p.y-feetY)-(m.g.position.y+0.2))<0.45 && P.vel.y<=0){
+        p.x += m.dx; p.y = m.g.position.y+0.2+feetY; P.vel.y=0; P.grounded=true;
+      }
+    }
+  }
+
+  /* ---------- engeller (çarpmak kremayı sarsar) ---------- */
+  for(const h of world.hazards){
+    if(p.x+half>h.x && p.x-half<h.x+h.w && Math.abs(p.z-h.z)<1.5 && p.y+1.4>h.y && p.y< h.y+h.h){
+      P.balanceVel += 5.2;              // sert çarpma
+      P.slip += 0.11;
+      if(P.slip>=1) crash('cake');
+      // geri it
+      p.x -= P.vel.x*dt*1.6; P.vel.x*=-0.3;
+      if(P.hurtT<=0){ P.hurtT=0.7; lives--; sfx('crash'); shake=0.5; }
+    }
+  }
+
+  /* ---------- arabalar (atlama veya çarpma) ---------- */
+  for(const c of world.cars){
+    c.g.position.x += c.dir*c.speed*dt;
+    if(c.dir>0 && c.g.position.x > segStart+130) c.g.position.x = segStart+4;
+    if(c.dir<0 && c.g.position.x < segStart)     c.g.position.x = segStart+124;
+    // z ekseni: arabalar şeritlerde
+    c.g.position.z = c.lane;
+    const dx = p.x - c.g.position.x, dz = p.z - c.g.position.z;
+    if(Math.abs(dx)<2.4 && Math.abs(dz)<1.3 && p.y < 1.9){
+      P.balanceVel += 6.5;
+      P.slip += 0.14;
+      if(P.slip>=1) crash('cake');
+      if(P.hurtT<=0){ P.hurtT=0.7; lives--; sfx('crash'); shake=0.6; }
+    }
+  }
+  /* ---------- köpekler ---------- */
+  for(const d of world.dogs){
+    d.g.position.x += d.dir*d.speed*dt;
+    if(d.g.position.x>d.home+9) d.dir=-1;
+    if(d.g.position.x<d.home-9) d.dir=1;
+    d.g.rotation.y = d.dir>0?0:Math.PI;
+    if(Math.abs(p.x-d.g.position.x)<1.0 && Math.abs(p.z-d.g.position.z)<1.0 && p.y<1.2){
+      P.balanceVel += 5.5; P.slip += 0.12;
+      if(P.slip>=1) crash('cake');
+      if(P.hurtT<=0){ P.hurtT=0.7; lives--; sfx('crash'); shake=0.5; }
+    }
+  }
+  /* ---------- kaykaycılar ---------- */
+  for(const s of world.skaters){
+    s.g.position.x += s.dir*s.speed*dt;
+    s.g.rotation.y = s.dir>0?0:Math.PI;
+    if(s.g.position.x > segStart+130) s.g.position.x = segStart;
+    if(Math.abs(p.x-s.g.position.x)<1.1 && Math.abs(p.z-s.g.position.z)<1.1 && p.y<1.4){
+      P.balanceVel += 4.5; P.slip += 0.10;
+      if(P.slip>=1) crash('cake');
+      if(P.hurtT<=0){ P.hurtT=0.7; lives--; sfx('crash'); }
+    }
+  }
+  /* ---------- kalabalık ---------- */
+  for(const c of world.crowd){
+    c.g.position.x += c.dir*c.speed*dt;
+    if(c.g.position.x > segStart+130) c.g.position.x = segStart;
+    if(c.g.position.x < segStart)     c.g.position.x = segStart+130;
+    c.g.rotation.y = c.dir>0?0:Math.PI;
+    if(Math.abs(p.x-c.g.position.x)<0.85 && Math.abs(p.z-c.g.position.z)<0.85 && p.y<1.7){
+      P.balanceVel += 3.0; P.slip += 0.06;
+      if(P.slip>=1) crash('cake');
+      if(P.hurtT<=0){ P.hurtT=0.6; lives--; sfx('crash'); }
+    }
+  }
+
+  /* ---------- kontrol noktaları ---------- */
+  for(const c of world.checkpoints){
+    if(!c.active && Math.abs(p.x-c.x)<2 && Math.abs(p.z-c.z)<2){
+      c.active=true; score+=150;
+      toast('✓ KONTROL NOKTASI — Pasta yeniden dengelendi!', 1800);
+      P.slip = Math.max(0, P.slip-0.45);
+      sfx('checkpoint');
+    }
+    if(c.active) c.flag.rotation.y = Math.sin(performance.now()*0.004)*0.4;
+  }
+
+  /* ---------- bölüm geçişi ---------- */
+  if(p.x > stageLen - 3 && stageIdx < STAGES.length-1){
+    const prevLen = stageLen;
+    buildStage(stageIdx+1);
+    // yeni bolumun baslangicina guvenli sekilde isinlan (bosluga dusme)
+    const newStart = prevLen - 3;
+    p.x = Math.max(p.x, newStart); p.y = 0.02; p.z = 0;
+    P.vel.set(0,0,0); P.grounded = true;
+    toast('→ '+STAGES[stageIdx].ad, 2600);
+    P.slip = Math.max(0, P.slip-0.5);
+    sfx('stage');
+  }
+  /* ---------- FİNAL: kapıya varış ---------- */
+  if(world.goal && Math.abs(p.x-world.goal.x)<3.2 && Math.abs(p.z-world.goal.z)<4.0){
+    win();
+  }
+
+  /* ---------- düşme → son kontrol noktası ---------- */
+  if(p.y < -6){
+    const cp = world.checkpoints.filter(c=>c.active).sort((a,b)=>b.x-a.x)[0];
+    p.x = cp? cp.x : 6; p.z = cp? cp.z : 0; p.y = cp? 0.7 : 0.1;
+    P.vel.set(0,0,0);
+    P.slip = Math.min(1, P.slip+0.18);
+    P.balanceVel += 2;
+    sfx('crash');
+    if(P.slip>=1) crash('cake');
+  }
+
+  /* ---------- animasyon ---------- */
+  P.anim += P.speed*dt*2.4;
+  runner.g.position.y = p.y + (P.grounded? Math.sin(P.anim*2)*0.05 : 0);
+  runner.g.rotation.y = P.yaw;
+  // kollar
+  const sw = Math.sin(P.anim)*0.85;
+  runner.armL.rotation.x = sw;
+  runner.armR.rotation.x = -sw;
+  // etek + çoraplar koşuşta salınır
+  runner.torso.rotation.z = Math.sin(P.anim)*0.05;
+  runner.g.children.forEach(c=>{
+    if(c.geometry && c.geometry.type==='CapsuleGeometry' && c.material===M.sock){
+      c.rotation.x = Math.sin(P.anim + (c.position.x>0?0:Math.PI))*0.75;
+    }
+  });
+  // PASTA KUTUSU salınımı — denge mekaniğinin görseli
+  cakeBox.g.rotation.z = -P.balance*0.55;
+  cakeBox.g.rotation.x = 0.08 + P.balanceVel*0.05;
+  cakeBox.g.position.y = 1.42 + Math.sin(P.anim*2)*0.03;
+  // gövde hafif eğilme
+  runner.g.rotation.z = P.balance*0.09;
+  cakeBox.gift.rotation.z = -0.24 - P.balance*0.3;
+
+  P.hurtT = Math.max(0, P.hurtT-dt);
+  P.slip = Math.max(0, P.slip - dt*0.12);   // yavaş toparlanma
+  stageTime += dt;
+}
+
+/* ---------- çarpışma sonucu ---------- */
+function crash(kind){
+  if(state!==State.PLAY) return;
+  if(kind==='cake'){ gameOver('cake'); }
+  else if(lives<=0){ gameOver('time'); }
+}
+
+/* test/yardimci: oyuncuyu guvenli sekilde hedefe tasi */
+window.__teleportSafe = (x,y=0.02,z=0)=>{
+  P.slip=0; P.balance=0; P.balanceVel=0; P.vel.set(0,0,0);
+  P.grounded=true;
+  runner.g.position.set(x,y,z);
+  // finalde oldugunu da bildir
+  if(stageIdx===STAGES.length-1) P.yaw=0;
+};
+
+/* ══════════════════════════════════════════════════════════
+   10. SES
+   ══════════════════════════════════════════════════════════ */
+let AC=null;
+addEventListener('pointerdown', ()=>{ if(!AC){ try{AC=new (window.AudioContext||window.webkitAudioContext)();}catch(e){} } });
+function sfx(kind){
+  if(!AC) return;
+  const t=AC.currentTime;
+  const mk=(f0,f1,dur,type,vol)=>{
+    const o=AC.createOscillator(), g=AC.createGain();
+    o.type=type||'square'; o.frequency.setValueAtTime(f0,t);
+    if(f1) o.frequency.exponentialRampToValueAtTime(f1,t+dur);
+    g.gain.setValueAtTime(0.0001,t);
+    g.gain.exponentialRampToValueAtTime(vol||0.08,t+0.012);
+    g.gain.exponentialRampToValueAtTime(0.0001,t+dur);
+    o.connect(g); g.connect(AC.destination); o.start(t); o.stop(t+dur+0.02);
+  };
+  if(kind==='jump')     mk(400,880,0.16,'square',0.05);
+  if(kind==='crash')    mk(180,60,0.30,'sawtooth',0.09);
+  if(kind==='checkpoint'){ [523,659,784].forEach((f,i)=>setTimeout(()=>mk(f,0,0.13,'triangle',0.07),i*90)); }
+  if(kind==='stage')    { [392,523,659].forEach((f,i)=>setTimeout(()=>mk(f,0,0.15,'triangle',0.07),i*110)); }
+  if(kind==='win')      { [523,659,784,1046,1318].forEach((f,i)=>setTimeout(()=>mk(f,0,0.22,'triangle',0.08),i*140)); }
+}
+
+/* ══════════════════════════════════════════════════════════
+   11. KAMERA
+   ══════════════════════════════════════════════════════════ */
+const cam = { pitch:-0.20, dist:9.5, shake:0, mouseYaw:0 };
+function updateCamera(dt){
+  const p = runner.g.position;
+  const head = new THREE.Vector3(p.x, p.y+1.75, p.z);
+  // kamera karakterin yonunun ARDASINDA durur; fare ile yatay dondurulur
+  const yaw = P.yaw + cam.mouseYaw;
+  const cp = Math.cos(cam.pitch);
+  const dir = new THREE.Vector3(Math.sin(yaw)*cp, Math.sin(cam.pitch), Math.cos(yaw)*cp);
+  const desired = head.clone().addScaledVector(dir, -cam.dist);
+  desired.y = Math.max(desired.y, p.y+1.2);
+  camera.position.lerp(desired, 1-Math.exp(-11*dt));
+  camera.lookAt(head.x, head.y-0.15, head.z);
+  if(cam.shake>0){
+    camera.position.x += (Math.random()-0.5)*cam.shake;
+    camera.position.y += (Math.random()-0.5)*cam.shake;
+    cam.shake *= 0.85; if(cam.shake<0.01) cam.shake=0;
+  }
+  sun.position.set(p.x-30, 46, p.z+22);
+  sun.target.position.set(p.x,0,p.z);
+  sun.target.updateMatrixWorld();
+}
+
+/* ══════════════════════════════════════════════════════════
+   12. ANA DÖNGÜ
+   ══════════════════════════════════════════════════════════ */
+const clock = new THREE.Clock();
+const FIXED = 1/60;
+let acc = 0;
+function loop(){
+  requestAnimationFrame(loop);
+  // Sabit fizik adimi: yavas FPS'te de hiz dogru kalir (spiral-of-death yok).
+  const raw = clock.getDelta();
+  acc += Math.min(raw, 0.25);
+  let steps = 0;
+  while(acc >= FIXED && steps < 8){
+    acc -= FIXED; steps++;
+    stepGame(FIXED);
+  }
+  if(steps === 8) acc = 0;   // cok yavas -> birikimi at
+  updateCamera(steps ? FIXED*steps : Math.min(raw, 1/30));
+  renderer.render(scene, camera);
+}
+
+/* Bir simule adim: zaman + fizik + HUD */
+function stepGame(dt){
+
+  if(state===State.PLAY){
+    timeLeft -= dt;
+    panic = THREE.MathUtils.clamp(1 - timeLeft/300, 0, 1);
+    if(timeLeft<=0){ timeLeft=0; gameOver('time'); }
+    physics(dt);
+    updateHUD();
+    if(AC && AC.__music) AC.__music.playbackRate = 1 + panic*0.55;
+  }
+}
+
+/* ══════════════════════════════════════════════════════════
+   13. BAŞLAT
+   ══════════════════════════════════════════════════════════ */
+addEventListener('resize', ()=>{
+  camera.aspect = innerWidth/innerHeight;
+  camera.updateProjectionMatrix();
+  renderer.setSize(innerWidth, innerHeight);
+});
+addEventListener('keydown', e=>{ if(e.code==='Escape' && state===State.PLAY) pause(); });
+
+buildHUD();
+buildStage(0);
+el('tMsg').innerHTML = `<b>${CFG.ad}</b>, ${CFG.sure/60} dakikan var. Pasta kutusu dengesiz, yol uzun.<br>Bölümler: Ofis → Sokak → Metro → Yokuş → Kapı.`;
+show('prologue');
+el('sms2').style.display='none';
+
+requestAnimationFrame(()=>{
+  el('barFill').style.width='100%';
+  setTimeout(()=>{
+    el('load').classList.add('hidden');
+    state = State.PRO;
+  }, 300);
+});
+loop();
+
+/* ══════════════════════════════════════════════════════════
+   14. TEST HOOK'LARI
+   ══════════════════════════════════════════════════════════ */
+window.__dbg = ()=>({
+  state, lives, score, timeLeft:+timeLeft.toFixed(1),
+  x:+runner.g.position.x.toFixed(2),
+  y:+runner.g.position.y.toFixed(2),
+  z:+runner.g.position.z.toFixed(2),
+  grounded:P.grounded, speed:+P.speed.toFixed(2), vx:+P.vel.x.toFixed(2), vz:+P.vel.z.toFixed(2),
+  balance:+P.balance.toFixed(3),
+  slip:+P.slip.toFixed(3),
+  stage: stageIdx, stageLen:+stageLen.toFixed(1),
+  solids: world.solids.length, hazards: world.hazards.length,
+  checkpoints: world.checkpoints.length,
+  goalX: world.goal? +world.goal.x.toFixed(1):0,
+  hasGift: P.hasGift
+});
+window.__reset = ()=>{ startGame(); };
+window.__key = (c,d)=>{ if(d){ if(!keys.has(c)){keys.add(c); onKey(c);} } else keys.delete(c); };
+window.__mouse = (x)=>{ mx = x; };
+window.__teleport = (x,z=0,y=0)=>{ runner.g.position.set(x,y,z); P.vel.set(0,0,0); };
+window.__stage = (i)=>{
+  const prevLen = stageLen;
+  buildStage(i);
+  // oyuncuyu bu bolumun baslangicina tasi (yoksa bosluga dusuyor)
+  runner.g.position.set(Math.max(6, prevLen - 3), 0.02, 0);
+  P.vel.set(0,0,0); P.slip=0; P.grounded=true;
+};
+window.__setTime = (t)=>{ timeLeft=t; };
+window.__crash = ()=>{ P.slip=1; };
+</script>
+</body>
+</html>
