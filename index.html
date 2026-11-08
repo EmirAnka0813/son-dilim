@@ -1992,10 +1992,14 @@ window.__tilt = (v)=>{ tiltOverride = v; };
 window.__camYaw = ()=>+cam.yaw.toFixed(4);
 window.__charYaw = ()=>+P.yaw.toFixed(4);
 window.__setCamYaw = (v)=>{ cam.yaw = v; };
+window.__solidsDump = ()=>world.solids.map(s=>({x:s.x,w:s.w,y:s.y,floor:!!s.isFloor}));
 window.__teleport = (x,z=0,y=0)=>{ runner.g.position.set(x,y,z); P.vel.set(0,0,0); };
 window.__stage = (i)=>{
-  // Test icin izole kurulum: onceki bolumlerin birikmis stageLen'ini sifirla.
+  // Test icin izole kurulum: onceki bolumlerin birikmis stageLen'ini sifirla
+  // VE oyun durumunu PLAY'a al (onceki testten kalan 'over'/'win' temizlenmeli).
   segStart = 0; stageLen = 0;
+  state = State.PLAY; started = true;
+  timeLeft = CFG.sure; lives = 3;
   buildStage(i);
   // Oyuncuyu bolumun GIRISINE koy (zemin X-6'da basliyor -> X+2 guvenli)
   const entry = 2;                       // ofis X=0 -> x=2

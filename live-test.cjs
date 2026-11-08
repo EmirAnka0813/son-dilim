@@ -71,26 +71,24 @@ const URL = process.argv[2] || 'https://emiranka0813.github.io/son-dilim/';
     ck(`Bolum ${i + 1} kuruldu`, d.stage === i, `stage=${d.stage} solids=${d.solids}`);
   }
 
-  // final — bolum 4'u TAZE kur, sonra hedefe yur
+  // final — bolum 4'u TAZE kur
   await p.evaluate(() => window.__stage(4));
   await p.waitForTimeout(500);
   d = await p.evaluate(() => window.__dbg());
   ck('Finalde kapi var', d.goalX > 0, String(d.goalX));
-  // hedefin 8 birim gerisinden basla (zeminde)
-  await p.evaluate(g => window.__teleportSafe(g - 8, 0.02, 0), d.goalX);
-  await p.waitForTimeout(500);
-  const startX = await p.evaluate(() => window.__dbg().x);
+
+  // Oyuncu bolum girisinde (x=2) ve kapi x=4 -> yuruyerek kapiya ulas
   await p.evaluate(() => window.__setCamYaw(0));
   await p.evaluate(() => window.__key('KeyD', true));
   for (let i = 0; i < 25; i++) {
-    await p.waitForTimeout(250);
+    await p.waitForTimeout(200);
     const st = await p.evaluate(() => window.__dbg().state);
-    if (st === 'win') break;
+    if (st === 'win' || st === 'over') break;
   }
   await p.evaluate(() => window.__key('KeyD', false));
   d = await p.evaluate(() => window.__dbg());
   ck('Kapıya ulasma -> win', d.state === 'win',
-     `state=${d.state} x=${d.x} start=${startX} goal=${d.goalX}`);
+     `state=${d.state} x=${d.x} goal=${d.goalX}`);
 
   const fam = await p.evaluate(() => [...document.querySelectorAll('#famRow .nm')].map(n => n.textContent));
   ck('Aile tablosu 4 kisi', fam.length === 4, fam.join(','));
