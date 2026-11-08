@@ -1828,11 +1828,22 @@ function crash(kind){
 
 /* test/yardimci: oyuncuyu guvenli sekilde hedefe tasi */
 window.__teleportSafe = (x,y=0.02,z=0)=>{
+  // Hedefin altinda GERCEK zemin var mi bul; yoksa en yakin zemine tasi.
+  // (Birim testleri final hedefine giderken zemin altinda kalip dusuyordu.)
+  let best = null, bestDy = Infinity;
+  for(const s of world.solids){
+    if(!s.isFloor) continue;
+    if(x < s.x - 1.5 || x > s.x + s.w + 1.5) continue;
+    const dy = Math.abs(s.y - y);
+    if(dy < bestDy){ bestDy = dy; best = s; }
+  }
+  const tx = best ? Math.min(Math.max(x, best.x + 0.8), best.x + best.w - 0.8) : x;
+  const ty = best ? best.y + 0.02 : y;
   P.slip=0; P.balance=0; P.balanceVel=0; P.vel.set(0,0,0);
   P.grounded=true;
-  runner.g.position.set(x,y,z);
-  // finalde oldugunu da bildir
+  runner.g.position.set(tx, ty, z);
   if(stageIdx===STAGES.length-1) P.yaw=0;
+  return {x:tx, y:ty, found:!!best};
 };
 
 /* ══════════════════════════════════════════════════════════
