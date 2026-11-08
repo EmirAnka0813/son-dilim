@@ -228,9 +228,11 @@
 <div class="screen hidden" id="how">
   <div class="title" style="font-size:clamp(30px,5vw,54px)">NASIL OYNANIR</div>
   <p class="story">
-    <b>Sol tuş:</b> pastayı iki elinle tut, <b>fareyi sağa sola hareket ettir</b> →
-    kutu sarsılır. Denge çubuğu yeşil bölgedeyken bırak.<br><br>
-    <b>Ok tuşları / WASD:</b> koş. <b>SHIFT:</b> daha hızlı (ama daha çok sarsılır).<br>
+    <b>WASD:</b> Roblox tarzı — kameranın baktığı yöne göre koş.<br>
+    <b>FARE:</b> kamerayı döndür (tıkla → fare kilidi). Karakter baktığın yöne döner.<br>
+    <b>Q / E:</b> pasta kutusunu sola / sağa eğ — <b>iki elinle tut</b> gibi düşün.
+    Denge çubuğu yeşil bölgedeyken bırak.<br>
+    <b>SHIFT:</b> daha hızlı koş (ama daha çok sarsılır).<br>
     <b>SPACE:</b> zıpla (arabaların, boruların, rampaların üstünden atlamak için).<br><br>
     <b>Engel:</b> kutu çarpışır, çevreye çarpar, köşeye sıkışırsa <b>krem kayar</b> →
     denge çubuğu dolar → <b>PASTA KAZASI!</b> Son kontrol noktasına dönersin.<br><br>
@@ -444,13 +446,30 @@ composer.addPass(new OutputPass());
    2. MALZEMELER
    ══════════════════════════════════════════════════════════ */
 const M = {
-  asphalt : new THREE.MeshStandardMaterial({color:0x5a5478, roughness:0.92}),
+  asphalt : new THREE.MeshStandardMaterial({color:0x4a4460, roughness:0.42, metalness:0.55}),
   sidewalk: new THREE.MeshStandardMaterial({color:0xb8b0d0, roughness:0.88}),
   building: new THREE.MeshStandardMaterial({color:0x8d84b8, roughness:0.78}),
   glass   : new THREE.MeshStandardMaterial({color:0x9fd8ff, roughness:0.12, metalness:0.5,
              transparent:true, opacity:0.45}),
   office  : new THREE.MeshStandardMaterial({color:0x6d6690, roughness:0.72}),
   metal   : new THREE.MeshStandardMaterial({color:0xb8bcc8, roughness:0.35, metalness:0.8}),
+  chrome  : new THREE.MeshStandardMaterial({color:0xd8dce8, roughness:0.18, metalness:0.95}),
+  tire    : new THREE.MeshStandardMaterial({color:0x17151c, roughness:0.95}),
+  headlight: new THREE.MeshStandardMaterial({color:0xfff4d0, emissive:0xffe8a0,
+             emissiveIntensity:2.6, roughness:0.2}),
+  taillight: new THREE.MeshStandardMaterial({color:0xff5a4a, emissive:0xff2a1a,
+             emissiveIntensity:2.2, roughness:0.3}),
+  taxiSign: new THREE.MeshStandardMaterial({color:0xfff0a0, emissive:0xffcc33,
+             emissiveIntensity:2.4, roughness:0.3}),
+  taxi    : new THREE.MeshStandardMaterial({color:0xffc12e, roughness:0.32, metalness:0.4}),
+  taxi2   : new THREE.MeshStandardMaterial({color:0xffd94a, roughness:0.32, metalness:0.4}),
+  lampPost: new THREE.MeshStandardMaterial({color:0x39344a, roughness:0.6, metalness:0.5}),
+  lampGlow: new THREE.MeshStandardMaterial({color:0xfff0c0, emissive:0xffb347,
+             emissiveIntensity:4.0, roughness:0.2}),
+  reflective: new THREE.MeshStandardMaterial({color:0xf5f0ff, emissive:0x8888ff,
+             emissiveIntensity:0.9, roughness:0.3}),
+  barrier : new THREE.MeshStandardMaterial({color:0xff6b35, roughness:0.85}),
+  bike    : new THREE.MeshStandardMaterial({color:0x2f6ea8, roughness:0.45, metalness:0.5}),
   dark    : new THREE.MeshStandardMaterial({color:0x3d3358, roughness:0.82}),
   car1    : new THREE.MeshStandardMaterial({color:0xff5f56, roughness:0.35, metalness:0.35}),
   car2    : new THREE.MeshStandardMaterial({color:0x22e0ff, roughness:0.35, metalness:0.35}),
@@ -471,6 +490,42 @@ const M = {
   gift    : new THREE.MeshStandardMaterial({color:0xff5ab0, roughness:0.35, metalness:0.2}),
   ribbon  : new THREE.MeshStandardMaterial({color:0xffd24a, roughness:0.3, metalness:0.5,
              emissive:0x6b4d00, emissiveIntensity:0.5}),
+  curb    : new THREE.MeshStandardMaterial({color:0xc9c2dd, roughness:0.82}),
+  buildingEdge: new THREE.MeshStandardMaterial({color:0x4a4258, roughness:0.85}),
+  frame   : new THREE.MeshStandardMaterial({color:0xd8cfd8, roughness:0.75}),
+  windowLit: new THREE.MeshStandardMaterial({color:0xffd98a, emissive:0xffb347,
+             emissiveIntensity:1.9, roughness:0.35}),
+  windowDark: new THREE.MeshStandardMaterial({color:0x2a2440, roughness:0.28, metalness:0.4}),
+  ac      : new THREE.MeshStandardMaterial({color:0xb8b4c0, roughness:0.6, metalness:0.35}),
+  balcony : new THREE.MeshStandardMaterial({color:0x6b5f78, roughness:0.88}),
+  rail    : new THREE.MeshStandardMaterial({color:0x3f3a4d, roughness:0.6, metalness:0.5}),
+  shopGlass: new THREE.MeshStandardMaterial({color:0x9fd8ff, roughness:0.1, metalness:0.45,
+             transparent:true, opacity:0.5, emissive:0x1a3a5a, emissiveIntensity:0.5}),
+  awning  : new THREE.MeshStandardMaterial({color:0xc23a5a, roughness:0.9}),
+  signBoard: new THREE.MeshStandardMaterial({color:0x241c30, roughness:0.8}),
+  roofEdge: new THREE.MeshStandardMaterial({color:0x3d3348, roughness:0.9}),
+  metal   : new THREE.MeshStandardMaterial({color:0xb8bcc8, roughness:0.35, metalness:0.8}),
+  chrome  : new THREE.MeshStandardMaterial({color:0xd8dce8, roughness:0.18, metalness:0.95}),
+  tire    : new THREE.MeshStandardMaterial({color:0x17151c, roughness:0.95}),
+  headlight: new THREE.MeshStandardMaterial({color:0xfff4d0, emissive:0xffe8a0,
+             emissiveIntensity:2.6, roughness:0.2}),
+  taillight: new THREE.MeshStandardMaterial({color:0xff5a4a, emissive:0xff2a1a,
+             emissiveIntensity:2.2, roughness:0.3}),
+  taxiSign: new THREE.MeshStandardMaterial({color:0xfff0a0, emissive:0xffcc33,
+             emissiveIntensity:2.4, roughness:0.3}),
+  taxi    : new THREE.MeshStandardMaterial({color:0xffc12e, roughness:0.32, metalness:0.4}),
+  taxi2   : new THREE.MeshStandardMaterial({color:0xffd94a, roughness:0.32, metalness:0.4}),
+  lampPost: new THREE.MeshStandardMaterial({color:0x39344a, roughness:0.6, metalness:0.5}),
+  lampGlow: new THREE.MeshStandardMaterial({color:0xfff0c0, emissive:0xffb347,
+             emissiveIntensity:4.0, roughness:0.2}),
+  reflective: new THREE.MeshStandardMaterial({color:0xf5f0ff, emissive:0x8888ff,
+             emissiveIntensity:0.9, roughness:0.3}),
+  barrier : new THREE.MeshStandardMaterial({color:0xff6b35, roughness:0.85}),
+  bike    : new THREE.MeshStandardMaterial({color:0x2f6ea8, roughness:0.45, metalness:0.5}),
+  roadLine: new THREE.MeshStandardMaterial({color:0xf5d94a, roughness:0.75,
+             emissive:0x3a2f00, emissiveIntensity:0.4}),
+  houseRoof: new THREE.MeshStandardMaterial({color:0x8c3b4a, roughness:0.85}),
+  door    : new THREE.MeshStandardMaterial({color:0x4a2f4a, roughness:0.7}),
   bag     : new THREE.MeshStandardMaterial({color:0x6b4a35, roughness:0.9}),
   bagDark : new THREE.MeshStandardMaterial({color:0x4a3223, roughness:0.92}),
   dog     : new THREE.MeshStandardMaterial({color:0x8a6440, roughness:0.85}),
@@ -499,11 +554,76 @@ function mesh(geo, mat, x,y,z, parent){
   return m;
 }
 
-/* zemin parçası (çarpışmalı) */
+/* ══════════════════════════════════════════════════════════
+   ZEMİN & YOL — ıslak asfalt, kaldırım, yansıma
+   ══════════════════════════════════════════════════════════ */
 function floor(x, w, mat, y=0, depth=18){
   const m = mesh(new THREE.BoxGeometry(w,0.6,depth), mat, x+w/2, y-0.3, 0);
   world.solids.push({x, w, y, h:0.6, mesh:m, isFloor:true});
   return m;
+}
+
+/* YOL: asfalt + kaldırım + ıslak yansıma katmanı.
+   Referans: ıslak zemin neon tabelaları ve fenerleri yansıtır. */
+function road(x, w, depth=22, withReflector=true){
+  // asfalt (koyu, hafif ıslak parlaklık)
+  const asphalt = mesh(new THREE.BoxGeometry(w, 0.5, depth), M.asphalt, x+w/2, -0.25, 0);
+  world.solids.push({x, w, y:0, h:0.5, mesh:asphalt, isFloor:true});
+
+  // kaldırım (iki yanda, yükseltilmiş)
+  for (const s of [-1, 1]){
+    const sw = mesh(new THREE.BoxGeometry(w, 0.34, 3.4), M.sidewalk,
+      x+w/2, 0.17, s*(depth/2 - 1.7));
+    world.solids.push({x, w, y:0.34, h:0.34, mesh:sw, isFloor:true});
+    // kaldırım kenarı (gri bant)
+    mesh(new THREE.BoxGeometry(w, 0.06, 0.28), M.curb, x+w/2, 0.36, s*(depth/2 - 3.25));
+  }
+
+  // yol çizgileri (sarı, kesikli)
+  const dashMat = M.roadLine;
+  for (let i=0; i<Math.floor(w/6); i++){
+    const dl = mesh(new THREE.BoxGeometry(2.6, 0.02, 0.22), dashMat, x+3+i*6, 0.012, 0);
+  }
+
+  // ── ISLAK YANSIMA: yolun ortasına ince reflector ──
+  // Not: Reflector her bolum icin 1 tane (performans). Genislik = yolun yarisi.
+  /* ── ISLAK YÜZEY: PBR ile yansıma hissi (gerçek Reflector 2x render maliyeti) ──
+     Düşük roughness + yüksek metalness + ortam rengi = fener ve tabelalar
+     zemine yansıyormuş gibi görünür. Üstüne neon izler ekleniyor. */
+  const wetLayer = mesh(new THREE.PlaneGeometry(w, depth*0.66),
+    new THREE.MeshStandardMaterial({
+      color:0x3d3558, roughness:0.075, metalness:0.92,
+      transparent:true, opacity:0.72, envMapIntensity:1.4,
+      depthWrite:false
+    }), x+w/2, 0.016, 0);
+  wetLayer.rotation.x = -Math.PI/2;
+  world.props.push(wetLayer);
+
+  /* Neon yansıma izleri — tabelaların zemine düşen ışık lekesi */
+  for (let i=0; i<Math.floor(w/12); i++){
+    const hue = [0xff4d94, 0x4dd8ff, 0xffd24a, 0xff7a3d][i%4];
+    const streak = mesh(new THREE.PlaneGeometry(1.4, 7+Math.random()*5),
+      new THREE.MeshBasicMaterial({
+        color:hue, transparent:true, opacity:0.16,
+        blending:THREE.AdditiveBlending, depthWrite:false
+      }), x+6+i*12, 0.019, -2.5+Math.random()*5);
+    streak.rotation.x = -Math.PI/2;
+    streak.rotation.z = Math.random()*0.4;
+    world.props.push(streak);
+  }
+
+  // su birikintileri (yansimayi bozan lekeli alanlar)
+  for (let i=0; i<Math.floor(w/22); i++){
+    const pud = mesh(new THREE.CircleGeometry(1.4+Math.random()*1.6, 18),
+      new THREE.MeshStandardMaterial({
+        color:0x2a2440, roughness:0.04, metalness:0.9,
+        transparent:true, opacity:0.55}),
+      x+8+Math.random()*(w-16), 0.016, (Math.random()-0.5)*depth*0.4);
+    pud.rotation.x = -Math.PI/2;
+    pud.scale.set(1, 0.55+Math.random()*0.6, 1);
+    world.props.push(pud);
+  }
+  return asphalt;
 }
 /* engel (çarpışma → kutu sarsılır) */
 function hazard(x,w,h,z,mat, label){
@@ -521,13 +641,111 @@ function checkpoint(x, z=0){
   scene.add(g);
   world.checkpoints.push({g, flag, x, z, active:false});
 }
-function building(x,w,h,z,mat){
-  const m = mesh(new THREE.BoxGeometry(w,h,10), mat||M.building, x+w/2, h/2, z);
-  // pencere şeritleri
-  for(let i=0;i<Math.floor(h/3.2);i++){
-    mesh(new THREE.BoxGeometry(w*0.82,1.1,0.3), M.glass, x+w/2, 2.6+i*3.2, z+5.05);
+/* ══════════════════════════════════════════════════════════
+   BİNA — katlı cephe: zemin kat dükkan + daireler + balkon
+   + klima + neon tabela (referans tarzi)
+   ══════════════════════════════════════════════════════════ */
+const BINA_RENKLERI = [0x7a5a6e, 0x6b6478, 0x8a6a58, 0x5f6a72, 0x7d6a7a, 0x6a5a70];
+
+function building(x, w, h, z, mat){
+  const renk = mat || M.building;
+  const g = new THREE.Group();
+  const merkeziX = x + w/2;
+  const yon = z > 0 ? -1 : 1;              // yola bakan yüz
+  const cepheZ = z + yon*5.05;
+
+  // ana gövde
+  const body = mesh(new THREE.BoxGeometry(w, h, 10), renk, merkeziX, h/2, z, g);
+  // köşe sütunları (gölge kırılımı için)
+  for (const s of [-1,1]){
+    mesh(new THREE.BoxGeometry(0.5, h, 10.4),
+      M.buildingEdge, merkeziX + s*(w/2 - 0.25), h/2, z, g);
   }
-  return m;
+
+  const katYuk = 3.4;
+  const katSayisi = Math.floor((h-2.2)/katYuk);
+
+  for (let k=0; k<katSayisi; k++){
+    const ky = 2.6 + k*katYuk;
+
+    // pencere dizisi
+    const pencereSayisi = Math.max(1, Math.floor(w/3.1));
+    for (let i=0; i<pencereSayisi; i++){
+      const pw = 1.5;
+      const px = merkeziX - (pencereSayisi-1)*3.1/2 + i*3.1;
+      // pencere cevresi (acik cerceve)
+      mesh(new THREE.BoxGeometry(pw+0.34, 2.0, 0.16), M.frame, px, ky, cepheZ + yon*0.06, g);
+      // cam (sicak ic isik ile)
+      const lit = Math.random() < 0.55;
+      const win = mesh(new THREE.BoxGeometry(pw, 1.72, 0.12),
+        lit ? M.windowLit : M.windowDark, px, ky, cepheZ + yon*0.14, g);
+      // pervaz
+      mesh(new THREE.BoxGeometry(pw+0.4, 0.12, 0.28), M.frame, px, ky-1.02, cepheZ + yon*0.12, g);
+      // klima (bazi pencerelerde)
+      if (Math.random() < 0.30){
+        const ac = mesh(new THREE.BoxGeometry(0.82, 0.55, 0.42), M.ac, px+0.75, ky-0.55, cepheZ + yon*0.32, g);
+        ac.scale.set(1,1,1);
+      }
+    }
+
+    // balkon (her 2 katta bir)
+    if (k>0 && k%2===1 && w>7){
+      const bal = mesh(new THREE.BoxGeometry(w*0.62, 0.18, 1.5), M.balcony,
+        merkeziX, ky-1.05, cepheZ + yon*0.75, g);
+      // korkuluk
+      for (let i=0;i<7;i++){
+        mesh(new THREE.CylinderGeometry(0.05,0.05,0.85,6), M.rail,
+          merkeziX - w*0.28 + i*(w*0.56/6), ky-0.55, cepheZ + yon*1.42, g);
+      }
+      mesh(new THREE.BoxGeometry(w*0.62, 0.09, 0.09), M.rail,
+        merkeziX, ky-0.14, cepheZ + yon*1.42, g);
+    }
+  }
+
+  // ── ZEMİN KAT DÜKKAN ──
+  const shopW = w*0.7;
+  mesh(new THREE.BoxGeometry(shopW, 2.5, 0.2), M.shopGlass, merkeziX, 1.35, cepheZ + yon*0.16, g);
+  // tente
+  const tent = mesh(new THREE.BoxGeometry(shopW+0.6, 0.12, 1.5), M.awning,
+    merkeziX, 2.72, cepheZ + yon*0.78, g);
+  tent.rotation.x = yon*0.22;
+  // tente çubukları
+  for (const s of [-1,1])
+    mesh(new THREE.CylinderGeometry(0.05,0.05,1.6,6), M.rail,
+      merkeziX + s*shopW*0.46, 1.9, cepheZ + yon*1.42, g);
+  // tabela üstü (neon)
+  mesh(new THREE.BoxGeometry(shopW+0.4, 0.75, 0.24), M.signBoard, merkeziX, 3.35, cepheZ + yon*0.2, g);
+
+  // ── NEON TABELA (emissive, bloom ile parlar) ──
+  const neonColors = [0xff4d94, 0x4dd8ff, 0xffd24a, 0x7cff8a, 0xff7a3d];
+  const neon = new THREE.MeshStandardMaterial({
+    color: neonColors[(Math.random()*neonColors.length)|0],
+    emissive: neonColors[(Math.random()*neonColors.length)|0],
+    emissiveIntensity: 3.2, roughness: 0.25
+  });
+  const nW = shopW*0.62;
+  // neon harfler yerine: isikli cubuklar (okunabilir "yazi" hissi)
+  const letterCount = 4 + ((Math.random()*4)|0);
+  for (let i=0;i<letterCount;i++){
+    const lw = nW/letterCount*0.55;
+    const lx = merkeziX - nW/2 + (i+0.5)*(nW/letterCount);
+    const h = 0.32 + Math.random()*0.22;
+    mesh(new THREE.BoxGeometry(lw, h, 0.12), neon, lx, 3.35, cepheZ + yon*0.36, g);
+  }
+  // neon isik yayi (koyu kutu + isik)
+  const neonLight = new THREE.PointLight(neon.emissive.getHex(), 9, 11, 2);
+  neonLight.position.set(merkeziX, 3.2, cepheZ + yon*1.5);
+  g.add(neonLight);
+
+  // cati detayi
+  mesh(new THREE.BoxGeometry(w+0.4, 0.4, 10.4), M.roofEdge, merkeziX, h+0.2, z, g);
+  // rooftop: su deposu + anten
+  const tank = mesh(new THREE.CylinderGeometry(0.7,0.7,1.3,12), M.metal, merkeziX+w*0.28, h+1.2, z+1, g);
+  const ant = mesh(new THREE.CylinderGeometry(0.04,0.04,2.4,6), M.rail, merkeziX-w*0.3, h+1.6, z-1, g);
+
+  scene.add(g);
+  world.props.push(g);
+  return g;
 }
 
 /* ══════════════════════════════════════════════════════════════════════
@@ -799,58 +1017,184 @@ function buildOffice(){
   stageLen = 46;
 }
 
+/* ══════════════════════════════════════════════════════════
+   ARAÇ — taksi / sedan / minibüs (referans tarzi)
+   ══════════════════════════════════════════════════════════ */
+function makeCar(type, colorMat){
+  const g = new THREE.Group();
+  const W = type==='van' ? 2.9 : 2.05;
+  const L = type==='van' ? 6.4 : 4.5;
+  const H = type==='van' ? 2.5 : 1.15;
+
+  const body = mesh(new THREE.BoxGeometry(L, H, W), colorMat, 0, 0.78, 0, g);
+  mesh(new THREE.BoxGeometry(L*0.98, 0.34, W*0.94), M.dark, 0, 0.36, 0, g);
+
+  if (type==='van'){
+    mesh(new THREE.BoxGeometry(L*0.62, 1.15, W*0.97), colorMat, -0.3, 1.85, 0, g);
+    for (const s of [-1,1])
+      mesh(new THREE.BoxGeometry(L*0.55, 0.78, 0.1), M.glass, -0.3, 1.95, s*(W/2+0.02), g);
+    mesh(new THREE.BoxGeometry(0.12, 0.9, W*0.88), M.glass, L*0.30, 1.95, 0, g);
+    mesh(new THREE.BoxGeometry(0.5, 0.16, 0.5), M.windowLit, -0.3, 2.48, 0, g);
+  } else {
+    mesh(new THREE.BoxGeometry(L*0.52, 0.78, W*0.88), colorMat, -0.15, 1.42, 0, g);
+    mesh(new THREE.BoxGeometry(0.5, 0.6, W*0.8), M.glass, L*0.13, 1.44, 0, g);
+    mesh(new THREE.BoxGeometry(0.12, 0.55, W*0.78), M.glass, -L*0.39, 1.44, 0, g);
+    for (const s of [-1,1])
+      mesh(new THREE.BoxGeometry(L*0.44, 0.55, 0.08), M.glass, -0.15, 1.44, s*(W*0.45), g);
+    if (type==='taxi')
+      mesh(new THREE.BoxGeometry(0.62, 0.24, 0.34), M.taxiSign, 0.1, 1.92, 0, g);
+  }
+
+  for (const s of [-1,1]){
+    mesh(new THREE.BoxGeometry(0.1, 0.22, 0.36), M.headlight, L/2-0.02, 0.82, s*(W*0.32), g);
+    mesh(new THREE.BoxGeometry(0.1, 0.2, 0.32), M.taillight, -L/2+0.02, 0.85, s*(W*0.33), g);
+  }
+  mesh(new THREE.BoxGeometry(0.14, 0.22, W*0.92), M.chrome, L/2-0.02, 0.48, 0, g);
+  mesh(new THREE.BoxGeometry(0.14, 0.22, W*0.92), M.chrome, -L/2+0.02, 0.48, 0, g);
+  for (const s of [-1,1])
+    mesh(new THREE.BoxGeometry(0.22, 0.12, 0.1), M.dark, L*0.16, 1.45, s*(W*0.52), g);
+
+  const wx = type==='van' ? [-2.1, 1.9] : [-1.45, 1.45];
+  for (const x of wx) for (const z of [-1,1]){
+    const tire = mesh(new THREE.CylinderGeometry(0.42, 0.42, 0.26, 14), M.tire, x, 0.42, z*(W/2-0.1), g);
+    tire.rotation.x = Math.PI/2;
+    const rim = mesh(new THREE.CylinderGeometry(0.24, 0.24, 0.28, 12), M.chrome, x, 0.42, z*(W/2-0.09), g);
+    rim.rotation.x = Math.PI/2;
+  }
+  return g;
+}
+
 function buildStreet(){
   const X = stageLen - 4;   // onki bolumle overlap
-  floor(X, 120, M.asphalt, 0, 22);
-  // kaldırım
-  floor(X, 120, M.sidewalk, 0.25, 4);
-  // binalar
-  for(let i=0;i<9;i++){
-    const bx = X+6+i*13, h = 12+Math.random()*22;
-    building(bx, 11, h, -11);
-    building(bx, 11, h, 11);
+  road(X, 120, 22);         // asfalt + kaldirim + yansima + cizgiler
+
+  /* ── BİNALAR: iki sıra, farklı yükseklik ve renk ── */
+  for(let i=0;i<10;i++){
+    const bx = X+5+i*12, h = 11+Math.random()*20;
+    building(bx, 10.5, h, -11.5);
+    building(bx+2, 10.5, h*(0.7+Math.random()*0.5), 11.5);
   }
-  // trafik — iki yönlü
-  const carMats=[M.car1,M.car2,M.car3,M.car4];
-    for(let i=0;i<10;i++){
-    const cx = X+8+i*12, lane = (i%2===0)? -3.4 : 3.4;
+
+  /* ── TRAFİK: karışık araçlar, iki şerit ── */
+  const carMats=[M.taxi, M.car2, M.taxi2, M.car4, M.car3, M.car1];
+  const carTypes=['taxi','sedan','sedan','van','sedan','taxi'];
+  for(let i=0;i<14;i++){
+    const cx = X+6+i*9, lane = (i%2===0)? -3.4 : 3.4;
     const dir = (i%2===0)? 1 : -1;
-    const car = new THREE.Group();
-    mesh(new THREE.BoxGeometry(4.2,1.0,1.9), carMats[i%4], 0,0.65,0, car);
-    mesh(new THREE.BoxGeometry(2.2,0.75,1.75), M.glass, -0.2,1.45,0, car);
-    for(const wx of [-1.4,1.4]) for(const wz of [-0.95,0.95])
-      mesh(new THREE.CylinderGeometry(0.42,0.42,0.28,10), M.dark, wx,0.42,wz, car).rotation.x=Math.PI/2;
-    car.position.set(cx,0,lane);
+    const type = carTypes[i%carTypes.length];
+    const car = makeCar(type, carMats[i%carMats.length]);
+    car.position.set(cx, 0, lane);
     scene.add(car);
-    world.cars.push({g:car, dir, lane, speed: 9+Math.random()*7});
+    world.cars.push({g:car, dir, lane, speed: 7+Math.random()*7, len: type==='van'?6.4:4.5});
   }
-  // ıslak zemin (kaygan bölge)
-  const wet = mesh(new THREE.PlaneGeometry(16,14), new THREE.MeshStandardMaterial({
-      color:0x2a3550, roughness:0.06, metalness:0.6, transparent:true, opacity:0.8}),
-      X+52,0.02,0);
-  wet.rotation.x=-Math.PI/2;
+
+  /* ── SOKAK LAMBASI: ışık konisi + gerçek point light ── */
+  for(let i=0;i<8;i++){
+    const lx = X+9+i*15;
+    streetLamp(lx, -9.2);
+    if(i%2===0) streetLamp(lx+7, 9.2);
+  }
+
+  /* ── SU BİRİNTİSİ BÖLGESİ (kaygan) ── */
+  const wet = mesh(new THREE.CircleGeometry(6.5, 24), new THREE.MeshStandardMaterial({
+      color:0x2a2440, roughness:0.03, metalness:0.95, transparent:true, opacity:0.62}),
+      X+52, 0.018, 1.5);
+  wet.rotation.x=-Math.PI/2; wet.scale.set(1.6, 1, 1);
   world.props.push(wet);
-  world.wet = {x:X+44, w:16};
-  // inşaat alanı — borular (üzerinden yürü)
+
+  /* ── İNŞAAT ALANI: borular + koni + tahta barrier ── */
   const cx0 = X+70;
   floor(cx0, 16, M.sidewalk, 0.3, 16);
   for(let i=0;i<5;i++){
     const px = cx0+2+i*3;
     const pipe = mesh(new THREE.CylinderGeometry(0.4,0.4,12,12), M.pipe, px, 0.75, 0);
     pipe.rotation.z = Math.PI/2;
-    world.solids.push({x:px-0.4, w:0.8, y:1.15, h:0.5});
+    world.solids.push({x:px-0.4, w:0.8, y:1.15, h:0.5, isFloor:true});
   }
-  // inşaat konileri
-  for(let i=0;i<6;i++){
-    const c = mesh(new THREE.ConeGeometry(0.32,0.9,8), M.cone, cx0+1+i*2.6, 0.75, 4);
+  for(let i=0;i<7;i++){
+    const c = mesh(new THREE.ConeGeometry(0.32,0.9,8), M.cone, cx0+1+i*2.4, 0.75, 4);
     world.props.push(c);
+    // reflektif bant
+    const band = mesh(new THREE.CylinderGeometry(0.20,0.24,0.16,8), M.reflective, cx0+1+i*2.4, 0.80, 4);
+    world.props.push(band);
   }
-  // sokak köpekleri
-  for(let i=0;i<4;i++) addDog(X+30+i*22, (Math.random()-0.5)*10);
-  // kontrol noktası
+  // barrier
+  for(let i=0;i<3;i++){
+    const bar = mesh(new THREE.BoxGeometry(2.4,0.5,0.14), M.barrier, cx0+3+i*5, 0.55, 5.5);
+    world.props.push(bar);
+  }
+  // variller
+  for(let i=0;i<3;i++){
+    const bar = mesh(new THREE.CylinderGeometry(0.24,0.28,1.1,10), M.pipe, cx0+2+i*5, 0.55, 5.5);
+    world.props.push(bar);
+  }
+
+  /* ── SOKAK KÖPEKLERİ ── */
+  for(let i=0;i<4;i++) addDog(X+30+i*22, (Math.random()-0.5)*9);
+
+  /* ── PROPS: bisiklet, kutu, bank ── */
+  for(let i=0;i<5;i++){
+    const px = X+15+i*21;
+    if(i%2===0) bicycle(px, 8.4);
+    else crateStack(px, -8.6);
+  }
+
   checkpoint(X+30, 0);
   checkpoint(X+95, 0);
   stageLen = X + 120;
+}
+
+/* ── SOKAK LAMBASI: direk + ışık konisi + gerçek ışık ── */
+function streetLamp(x, z){
+  const g = new THREE.Group();
+  mesh(new THREE.CylinderGeometry(0.09,0.13,5.4,10), M.lampPost, 0, 2.7, 0, g);
+  mesh(new THREE.CylinderGeometry(0.06,0.06,1.5,8), M.lampPost, 0.62, 5.3, 0, g).rotation.z = -0.5;
+  // lamba basligi
+  mesh(new THREE.BoxGeometry(0.72,0.18,0.42), M.lampPost, 1.22, 5.45, 0, g);
+  // isik kaynagi (emissive -> bloom)
+  mesh(new THREE.BoxGeometry(0.58,0.08,0.34), M.lampGlow, 1.22, 5.34, 0, g);
+  // isik konisi (saydam koni)
+  const cone = mesh(new THREE.ConeGeometry(1.5, 4.6, 14, 1, true),
+    new THREE.MeshBasicMaterial({color:0xffd08a, transparent:true, opacity:0.10,
+      side:THREE.DoubleSide, depthWrite:false}), 1.22, 3.05, 0, g);
+  // gercek isik
+  const pl = new THREE.PointLight(0xffc070, 22, 14, 2);
+  pl.position.set(1.22, 5.2, 0);
+  g.add(pl);
+  g.position.set(x, 0, z);
+  scene.add(g);
+  world.props.push(g);
+}
+
+/* ── BISIKLET ── */
+function bicycle(x, z){
+  const g = new THREE.Group();
+  const frame = M.bike;
+  for (const wx of [-0.62, 0.62]){
+    const w = mesh(new THREE.TorusGeometry(0.36, 0.045, 8, 22), M.tire, wx, 0.40, 0, g);
+    w.rotation.y = Math.PI/2;
+    mesh(new THREE.CylinderGeometry(0.05,0.05,0.04,10), M.chrome, wx, 0.40, 0, g).rotation.x = Math.PI/2;
+  }
+  mesh(new THREE.BoxGeometry(1.1,0.05,0.05), frame, 0, 0.60, 0, g);
+  mesh(new THREE.BoxGeometry(0.05,0.45,0.05), frame, 0.25, 0.48, 0, g);
+  mesh(new THREE.BoxGeometry(0.42,0.04,0.04), M.chrome, 0.55, 0.78, 0, g);
+  mesh(new THREE.BoxGeometry(0.24,0.04,0.04), M.chrome, -0.5, 0.76, 0, g);
+  g.position.set(x, 0, z);
+  g.rotation.y = Math.random()*0.6 - 0.3;
+  scene.add(g);
+  world.props.push(g);
+}
+
+/* ── KASA YIGINI (bakkal) ── */
+function crateStack(x, z){
+  const g = new THREE.Group();
+  for (let i=0;i<3;i++){
+    const c = mesh(new THREE.BoxGeometry(0.9,0.62,0.9), M.box, (i%2)*0.12, 0.33+i*0.64, 0, g);
+    c.rotation.y = (Math.random()-0.5)*0.25;
+  }
+  g.position.set(x, 0, z);
+  scene.add(g);
+  world.props.push(g);
 }
 
 function buildMetro(){
@@ -920,29 +1264,38 @@ function buildNeighborhood(){
 function buildHome(){
   const X = stageLen - 4;
   floor(X, 40, M.sidewalk, 0, 20);
-  // kapi onu: oyuncu X+6'a gelir
-  // ev
-  const house = mesh(new THREE.BoxGeometry(14,9,12), M.cake, X+14,4.5,0);
-  mesh(new THREE.BoxGeometry(14.6,0.7,12.6), M.cream, X+14,9.3,0);
-  // kapı
-  const door = mesh(new THREE.BoxGeometry(0.3,3.4,2.2), M.dark, X+7.05,1.7,0);
-  // pencereler (içeriden ışık)
-  for(let r=0;r<2;r++) for(const ox of [3,10]){
-    const win = mesh(new THREE.BoxGeometry(2.2,2.2,0.2), new THREE.MeshStandardMaterial({
-        color:0xffe9a8, emissive:0xffcc55, emissiveIntensity:1.6, roughness:0.5}),
-        X+ox, 2.2+r*3.6, 6.05);
+  /* EV — yolun SAGINDA, oyuncu yolda kalir (evin icine girmeye calismaz) */
+  const house = mesh(new THREE.BoxGeometry(13,8.5,11), M.cake, X+11, 4.25, -10);
+  mesh(new THREE.BoxGeometry(13.6,0.7,11.6), M.cream, X+11, 8.85, -10);
+  // cati
+  const roof = mesh(new THREE.ConeGeometry(9.6, 2.6, 4), M.houseRoof, X+11, 10.2, -10);
+  roof.rotation.y = Math.PI/4;
+  // kapı (yola bakan yüzde, z=-4.5)
+  mesh(new THREE.BoxGeometry(1.5, 3.0, 0.3), M.door, X+11, 1.5, -4.45);
+  // pencereler — iceriden sicak isik
+  const winMat = new THREE.MeshStandardMaterial({
+    color:0xffe9a8, emissive:0xffc04a, emissiveIntensity:2.2, roughness:0.4});
+  for(let r=0;r<2;r++) for(const ox of [-3.6, 0, 3.6]){
+    mesh(new THREE.BoxGeometry(1.5,1.5,0.2), winMat, X+11+ox, 2.1+r*3.1, -4.45);
   }
-  // bahçe ışıkları
-  for(let i=0;i<5;i++){
-    const l = new THREE.PointLight(0xffcc66, 14, 20, 2);
-    l.position.set(X+4+i*7, 4, 7);
+  // bahce lambalari
+  for(let i=0;i<4;i++){
+    const l = new THREE.PointLight(0xffcc66, 16, 18, 2);
+    l.position.set(X+5+i*4.5, 3.4, -3.6);
     scene.add(l);
   }
+  // yol tarafi: kapi onundeki hedef noktasi (yolun uzerinde)
   checkpoint(X+2, 0);
   world.goal = {x:X+5, z:0};
-  const goalLight = new THREE.PointLight(0xff5ab0, 40, 30, 2);
-  goalLight.position.set(X+5, 3, 0);
+  const goalLight = new THREE.PointLight(0xff5ab0, 45, 26, 2);
+  goalLight.position.set(X+5, 2.6, 0);
   scene.add(goalLight);
+  // hedef isareti (parlayan halka)
+  const ring = mesh(new THREE.TorusGeometry(1.5, 0.09, 10, 32),
+    new THREE.MeshStandardMaterial({color:0xff5ab0, emissive:0xff2a9a, emissiveIntensity:2.4, roughness:0.3}),
+    X+5, 0.12, 0);
+  ring.rotation.x = -Math.PI/2;
+  world.props.push(ring);
   stageLen = X + 40;
 }
 
@@ -1015,20 +1368,38 @@ addEventListener('keyup', e=>keys.delete(e.code));
 addEventListener('blur', ()=>keys.clear());
 
 /* fare → denge (pasta sağa/sola savrulur) */
-let mx=0, my=0;
-canvas.addEventListener('mousemove', e=>{
-  const w = innerWidth/2, h = innerHeight/2;
-  mx = (e.clientX - w)/w;      // -1..1  -> pasta dengesi
-  my = (e.clientY - h)/h;      // -1..1  -> kamera pitch
-  cam.pitch = THREE.MathUtils.clamp(my*0.42, -0.85, 0.55);
+let tiltOverride=null;
+/* ═══ FARE — Roblox tarzı ═══
+   • Sol/sağ hareket → kamera yatay döner
+   • Yukarı/aşağı    → pitch (bakış eğimi)
+   • Pasta dengesi artık KLAVYE/Q-E ile: kutu elle tutulur */
+let mouseLocked = false;
+canvas.addEventListener('click', ()=>{
+  if(state===State.PLAY && !mouseLocked){
+    canvas.requestPointerLock?.();
+  }
+});
+document.addEventListener('pointerlockchange', ()=>{
+  mouseLocked = document.pointerLockElement === canvas;
+  el('prompt').innerHTML = mouseLocked
+    ? '<kbd>W</kbd><kbd>A</kbd><kbd>S</kbd><kbd>D</kbd> koş · <kbd>FARE</kbd> bak · <kbd>Q</kbd><kbd>E</kbd> pasta · <kbd>SHIFT</kbd> hızlı'
+    : '<kbd>W</kbd><kbd>A</kbd><kbd>S</kbd><kbd>D</kbd> koş · <kbd>TIKLA</kbd> fare kilidi · <kbd>Q</kbd><kbd>E</kbd> pasta';
+});
+document.addEventListener('mousemove', e=>{
+  if(mouseLocked){
+    // Pointer lock: delta ile kamera dondur
+    cam.yaw   -= e.movementX * cam.sens;
+    cam.pitch  = THREE.MathUtils.clamp(cam.pitch - e.movementY * cam.sens*0.9, -0.95, 0.55);
+  } else {
+    // Lock yokken: ekran ortasina gore mutlak kontrol (yedek)
+    const w = innerWidth/2, h = innerHeight/2;
+    cam.yaw   -= (e.clientX - w) * 0.0009;
+    cam.pitch  = THREE.MathUtils.clamp(cam.pitch - (e.clientY - h)*0.0009, -0.95, 0.55);
+  }
 });
 canvas.addEventListener('mousedown', e=>{ if(e.button===0) P.buffer=0.16; });
 addEventListener('touchstart', e=>{
-  if(state==='play' && !e.target.closest('.cta')){
-    P.buffer=0.16;
-    const tx = e.touches[0].clientX/innerWidth*2-1;
-    mx = tx;
-  }
+  if(state==='play' && !e.target.closest('.cta')) P.buffer=0.16;   // dokunmatik ziplama
 }, {passive:true});
 
 /* ══════════════════════════════════════════════════════════
@@ -1061,7 +1432,7 @@ function startGame(){
   state=State.PLAY; started=true;
   show(null);
   toast('BÖLÜM 1 — Ofisten kaç! FARE ile pastası dengele.', 3400);
-  el('prompt').innerHTML='<kbd>A</kbd><kbd>D</kbd> koş · <kbd>FARE</kbd> dengele · <kbd>SPACE</kbd> zıpla · <kbd>SHIFT</kbd> hızlı';
+  el('prompt').innerHTML='<kbd>W</kbd><kbd>A</kbd><kbd>S</kbd><kbd>D</kbd> koş · <kbd>FARE</kbd> bak · <kbd>Q</kbd><kbd>E</kbd> pasta · <kbd>SPACE</kbd> zıpla · <kbd>SHIFT</kbd> hızlı';
 }
 function pause(){ if(state!==State.PLAY) return; state=State.PAUSE; show('pause'); }
 function resume(){ if(state!==State.PAUSE) return; state=State.PLAY; show(null); }
@@ -1172,7 +1543,9 @@ function solidAt(x, z, yFeet){
 function physics(dt){
   const p = runner.g.position;
 
-  /* ---------- koşu ---------- */
+  /* ══════════════════════════════════════════════════════════
+     KOŞU — Roblox tarzı: WASD KAMERA GÖRELİ, karakter baktığı yöne döner
+     ══════════════════════════════════════════════════════════ */
   let fwd=0, str=0;
   if(keys.has('KeyW')||keys.has('ArrowUp'))    fwd+=1;
   if(keys.has('KeyS')||keys.has('ArrowDown'))  fwd-=1;
@@ -1181,15 +1554,26 @@ function physics(dt){
   const sprint = keys.has('ShiftLeft')||keys.has('ShiftRight');
   const maxSpd = sprint? 15 : 10.5;
 
-  // YON: dunya koordinatinda. yaw=0 => +Z (ileri), yaw=PI/2 => +X (sag).
-  // Karakter yonu GIRDIDEN hesaplanir (yaw'a bakarak degil) -> daire cizmez.
-  const tx = str, tz = fwd;
+  /* KAMERA YÖNÜNE GÖREL HAREKET
+     cam.yaw: kameranın baktığı yatay açı (fare ile değişir)
+     W  -> kameranın baktığı yöne (ileri)
+     S  -> geri
+     A/D-> sağ/sol (kameraya göre)
+     Karakterin yaw'u HAREKET YÖNÜNE döner (Roblox'ta karakter döner). */
+  const camYaw = cam.yaw;
+  const cY = Math.cos(camYaw), sY = Math.sin(camYaw);
+  // kamera ileri vektörü (yaw=0 -> +Z), sag vektörü (+X)
+  const fwdX = sY, fwdZ = cY;
+  const rightX = cY, rightZ = -sY;
+  let tx = fwdX*fwd + rightX*str;
+  let tz = fwdZ*fwd + rightZ*str;
   const tl = Math.hypot(tx,tz);
   if(tl>0.001){
-    const wx = tx/tl, wz = tz/tl;
+    tx/=tl; tz/=tl;
     const acc = P.grounded? 55 : 20;
-    P.vel.x += wx*acc*dt; P.vel.z += wz*acc*dt;
-    P.yaw = Math.atan2(wx,wz);   // karakter yeni yone doner
+    P.vel.x += tx*acc*dt; P.vel.z += tz*acc*dt;
+    // Karakter hareket yonune doner (Roblox davranisi)
+    P.yaw = Math.atan2(tx, tz);
   } else if(P.grounded){
     const f=26*dt, m=Math.hypot(P.vel.x,P.vel.z);
     if(m<=f){P.vel.x=0;P.vel.z=0;} else {P.vel.x-=P.vel.x/m*f; P.vel.z-=P.vel.z/m*f;}
@@ -1200,24 +1584,34 @@ function physics(dt){
 
   /* ---------- DENGE MEKANİĞİ (kutunun salınımı) ---------- */
   // fare konumu hedef eğim; hareket de kutuya momentum katar
-  const target = mx;                                  // -1..1
-  // salınım doğal frekansı (sarkaç)
-  const k = 22, damp = 2.4;
-  // dış kuvvet: fare hedefi + koşu ivmesi + zıplama
+  /* ═══ DENGE — Roblox tarzı "iki el" kontrolü ═══
+     Q = kutuyu sola, E = sağa eğ (karşılaştırmalı: basılı tut)
+     Fare artık kamerayı döndürür. */
+  let tilt = 0;
+  if(keys.has('KeyQ')) tilt -= 1;
+  if(keys.has('KeyE')) tilt += 1;
+  if(tiltOverride !== null) tilt = tiltOverride;
+  // klavye yoksa hedef 0 (kutu ortada kalir, sadece sarsıntıyla oynar)
+  const target = tilt;
+
+  /* Sarkac: sert ama KONTROLLU. Kucuk k = yavas toparlanma, yuksek damp = titresiz.
+     Amac: oyuncu 9 yasinda, tusu biraz basip biraktiginda denge geri gelmeli. */
+  const k = 9.5, damp = 3.6;
+  // ivme etkisi: kutu hareket yonunde hafifce geriye itilir
   const accelX = (P.vel.x - (P.velPrevX||0))/Math.max(dt,0.001);
   const accelZ = (P.vel.z - (P.velPrevZ||0))/Math.max(dt,0.001);
   P.velPrevX = P.vel.x; P.velPrevZ = P.vel.z;
-  const shakeForce = (target - P.balance)*k*0.55
-                   - (accelX*Math.cos(P.yaw) + accelZ*Math.sin(P.yaw))*0.055
-                   + (sprint? (Math.random()-0.5)*1.4 : (Math.random()-0.5)*0.5)
-                   + Math.sin(performance.now()*0.004)*0.35;
+  const shakeForce = (target - P.balance)*k
+                   - (accelX*Math.cos(P.yaw) + accelZ*Math.sin(P.yaw))*0.016
+                   + (sprint? (Math.random()-0.5)*0.5 : (Math.random()-0.5)*0.18)
+                   + Math.sin(performance.now()*0.004)*0.16;
   P.balanceVel += shakeForce*dt;
   P.balanceVel -= P.balanceVel*damp*dt;
   P.balance += P.balanceVel*dt;
-  P.balance = THREE.MathUtils.clamp(P.balance, -1.6, 1.6);
+  P.balance = THREE.MathUtils.clamp(P.balance, -1.25, 1.25);
 
-  // krem kayması
-  const slipRate = Math.max(0, Math.abs(P.balance)-0.62) * 0.55;
+  /* Krem kaymasi: yalnizca belirgin egimde ve YAVAS. Cozum her zaman mümkün olsun. */
+  const slipRate = Math.max(0, Math.abs(P.balance)-0.80) * 0.30;
   P.slip = Math.min(1, P.slip + slipRate*dt);
   if(P.slip >= 1) crash('cake');
   if(P.slip > 0.06) cakeBox.smear.visible = true;
@@ -1228,7 +1622,7 @@ function physics(dt){
   if(P.grounded) P.coyote=0.13;
   if(P.buffer>0 && P.coyote>0){
     P.vel.y=13.5; P.buffer=0; P.coyote=0; P.grounded=false;
-    P.balanceVel += (Math.random()-0.5)*2.2;   // zıplama sarsar
+    P.balanceVel += (Math.random()-0.5)*1.1;   // zıplama sarsar
     sfx('jump');
   }
   const jumpHeld = keys.has('Space');
@@ -1248,7 +1642,7 @@ function physics(dt){
       if(p.x+half-s.x < s.x+s.w-(p.x-half)){
         p.x = s.x-half; P.vel.x=0;
       } else { p.x = s.x+s.w+half; P.vel.x=0; }
-      P.balanceVel += 1.6;
+      P.balanceVel += 0.9;
     }
   }
   // Z
@@ -1284,8 +1678,8 @@ function physics(dt){
   /* ---------- engeller (çarpmak kremayı sarsar) ---------- */
   for(const h of world.hazards){
     if(p.x+half>h.x && p.x-half<h.x+h.w && Math.abs(p.z-h.z)<1.5 && p.y+1.4>h.y && p.y< h.y+h.h){
-      P.balanceVel += 5.2;              // sert çarpma
-      P.slip += 0.11;
+      P.balanceVel += 2.6;              // sert çarpma
+      P.slip += 0.04;
       if(P.slip>=1) crash('cake');
       // geri it
       p.x -= P.vel.x*dt*1.6; P.vel.x*=-0.3;
@@ -1301,9 +1695,10 @@ function physics(dt){
     // z ekseni: arabalar şeritlerde
     c.g.position.z = c.lane;
     const dx = p.x - c.g.position.x, dz = p.z - c.g.position.z;
-    if(Math.abs(dx)<2.4 && Math.abs(dz)<1.3 && p.y < 1.9){
-      P.balanceVel += 6.5;
-      P.slip += 0.14;
+    const halfLen = (c.len||4.5)/2 + 0.3;
+    if(Math.abs(dx)<halfLen && Math.abs(dz)<1.4 && p.y < 1.9){
+      P.balanceVel += 3.0;
+      P.slip += 0.055;
       if(P.slip>=1) crash('cake');
       if(P.hurtT<=0){ P.hurtT=0.7; lives--; sfx('crash'); shake=0.6; }
     }
@@ -1315,7 +1710,7 @@ function physics(dt){
     if(d.g.position.x<d.home-9) d.dir=1;
     d.g.rotation.y = d.dir>0?0:Math.PI;
     if(Math.abs(p.x-d.g.position.x)<1.0 && Math.abs(p.z-d.g.position.z)<1.0 && p.y<1.2){
-      P.balanceVel += 5.5; P.slip += 0.12;
+      P.balanceVel += 2.5; P.slip += 0.045;
       if(P.slip>=1) crash('cake');
       if(P.hurtT<=0){ P.hurtT=0.7; lives--; sfx('crash'); shake=0.5; }
     }
@@ -1326,7 +1721,7 @@ function physics(dt){
     s.g.rotation.y = s.dir>0?0:Math.PI;
     if(s.g.position.x > segStart+130) s.g.position.x = segStart;
     if(Math.abs(p.x-s.g.position.x)<1.1 && Math.abs(p.z-s.g.position.z)<1.1 && p.y<1.4){
-      P.balanceVel += 4.5; P.slip += 0.10;
+      P.balanceVel += 2.1; P.slip += 0.035;
       if(P.slip>=1) crash('cake');
       if(P.hurtT<=0){ P.hurtT=0.7; lives--; sfx('crash'); }
     }
@@ -1338,7 +1733,7 @@ function physics(dt){
     if(c.g.position.x < segStart)     c.g.position.x = segStart+130;
     c.g.rotation.y = c.dir>0?0:Math.PI;
     if(Math.abs(p.x-c.g.position.x)<0.85 && Math.abs(p.z-c.g.position.z)<0.85 && p.y<1.7){
-      P.balanceVel += 3.0; P.slip += 0.06;
+      P.balanceVel += 1.4; P.slip += 0.02;
       if(P.slip>=1) crash('cake');
       if(P.hurtT<=0){ P.hurtT=0.6; lives--; sfx('crash'); }
     }
@@ -1378,7 +1773,7 @@ function physics(dt){
     p.x = cp? cp.x : 6; p.z = cp? cp.z : 0; p.y = cp? 0.7 : 0.1;
     P.vel.set(0,0,0);
     P.slip = Math.min(1, P.slip+0.18);
-    P.balanceVel += 2;
+    P.balanceVel += 1.0;
     sfx('crash');
     if(P.slip>=1) crash('cake');
   }
@@ -1409,7 +1804,7 @@ function physics(dt){
   cakeBox.gift.rotation.z = -0.24 - P.balance*0.3;
 
   P.hurtT = Math.max(0, P.hurtT-dt);
-  P.slip = Math.max(0, P.slip - dt*0.12);   // yavaş toparlanma
+  P.slip = Math.max(0, P.slip - dt*0.22);   // toparlanma
   stageTime += dt;
 }
 
@@ -1456,18 +1851,30 @@ function sfx(kind){
 /* ══════════════════════════════════════════════════════════
    11. KAMERA
    ══════════════════════════════════════════════════════════ */
-const cam = { pitch:-0.20, dist:9.5, shake:0, mouseYaw:0 };
+/* ══════════════════════════════════════════════════════════
+   KAMERA — Roblox tarzı 3. şahıs
+   • Fare sağa/sola → kamera yatay döner (cam.yaw)
+   • Karakter, kameranın baktığı yöne doğru yumuşakça döner
+   • W/S/A/D → kamera-göreli hareket
+   • Fare yukarı/aşağı → pitch (bakış eğimi)
+   ══════════════════════════════════════════════════════════ */
+const cam = { pitch:-0.18, dist:8.6, shake:0, yaw:0, sens:0.0026 };
 function updateCamera(dt){
   const p = runner.g.position;
-  const head = new THREE.Vector3(p.x, p.y+1.75, p.z);
-  // kamera karakterin yonunun ARDASINDA durur; fare ile yatay dondurulur
-  const yaw = P.yaw + cam.mouseYaw;
+  const head = new THREE.Vector3(p.x, p.y+1.72, p.z);
+
+  // Karakter, kameranın baktığı yöne doğru yumuşakça döner (Roblox hissi)
+  const diff = ((cam.yaw - P.yaw + Math.PI*3) % (Math.PI*2)) - Math.PI;
+  P.yaw += diff * Math.min(1, dt*9);
+
+  // Kamera karakterin arkasinda, yaw = karakter yaw (kameranin baktigi yon)
+  const yaw = P.yaw;
   const cp = Math.cos(cam.pitch);
   const dir = new THREE.Vector3(Math.sin(yaw)*cp, Math.sin(cam.pitch), Math.cos(yaw)*cp);
   const desired = head.clone().addScaledVector(dir, -cam.dist);
-  desired.y = Math.max(desired.y, p.y+1.2);
-  camera.position.lerp(desired, 1-Math.exp(-11*dt));
-  camera.lookAt(head.x, head.y-0.15, head.z);
+  desired.y = Math.max(desired.y, p.y+1.15);
+  camera.position.lerp(desired, 1-Math.exp(-14*dt));
+  camera.lookAt(head.x, head.y-0.12, head.z);
   if(cam.shake>0){
     camera.position.x += (Math.random()-0.5)*cam.shake;
     camera.position.y += (Math.random()-0.5)*cam.shake;
@@ -1559,7 +1966,10 @@ window.__dbg = ()=>({
 });
 window.__reset = ()=>{ startGame(); };
 window.__key = (c,d)=>{ if(d){ if(!keys.has(c)){keys.add(c); onKey(c);} } else keys.delete(c); };
-window.__mouse = (x)=>{ mx = x; };
+window.__tilt = (v)=>{ tiltOverride = v; };
+window.__camYaw = ()=>+cam.yaw.toFixed(4);
+window.__charYaw = ()=>+P.yaw.toFixed(4);
+window.__setCamYaw = (v)=>{ cam.yaw = v; };
 window.__teleport = (x,z=0,y=0)=>{ runner.g.position.set(x,y,z); P.vel.set(0,0,0); };
 window.__stage = (i)=>{
   const prevLen = stageLen;
