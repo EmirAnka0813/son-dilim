@@ -422,7 +422,7 @@ rim.position.set(12, 16, -30);
 scene.add(rim);
 
 /* Ortam sisi — gün batımı sisi */
-scene.fog = new THREE.FogExp2(0x54406e, 0.0072);
+scene.fog = new THREE.FogExp2(0x54406e, 0.0092);   // uzaklıkta derinlik hissi
 scene.background = new THREE.Color(0x3d2c58);
 
 /* Gökyüzü gradyanı (küre) */
@@ -471,6 +471,11 @@ const bloom = new UnrealBloomPass(
   0.80    // threshold — sadece gercekten parlak yerler
 );
 composer.addPass(bloom);
+
+/* ═══ DERİNLİK ALANI (hafif) ═══
+   BokehPass çok pahalı (FPS'i 60'ın altına düşürüyor).
+   Bunun yerine: mesafeye bağlı sis zaten derinlik hissi veriyor.
+   Ek olarak karakter odakta kalırken kenarlar yumuşak (vignette+grade). */
 
 /* Sinematik renk derecelendirme: sicak golge, soguk golge, kontrast, vignette */
 const GradeShader = {
@@ -940,6 +945,8 @@ function building(x, w, h, z, mat){
   const neonLight = new THREE.PointLight(neon.emissive.getHex(), 9, 11, 2);
   neonLight.position.set(merkeziX, 3.2, cepheZ + yon*1.5);
   g.add(neonLight);
+  // neon isik huzmesi (god ray)
+  if(world.addShaft) world.addShaft(merkeziX, 3.4, cepheZ + yon*0.4, 5.5, 2.0, neon.emissive.getHex());
 
   // cati detayi
   mesh(new THREE.BoxGeometry(w+0.4, 0.4, 10.4), M.roofEdge, merkeziX, h+0.2, z, g);
@@ -999,12 +1006,15 @@ function makeRunner(){
   const eyeW = new THREE.MeshStandardMaterial({color:0xffffff, roughness:0.28});
   const eyeI = new THREE.MeshStandardMaterial({color:0x4a2c1a, roughness:0.22});
   const lash = new THREE.MeshStandardMaterial({color:0x24150e, roughness:0.4});
+  const eyes = [];          // kirpma icin
+  const irises = [];       // bakis icin
   for (const s of [-1,1]){
     const eye = mesh(new THREE.SphereGeometry(0.062, 16, 14), eyeW, s*0.105, 2.045, 0.235, g);
     eye.scale.set(1, 1.12, 0.72);
     const iris = mesh(new THREE.SphereGeometry(0.032, 14, 12), eyeI, s*0.105, 2.042, 0.272, g);
     iris.scale.set(1, 1.1, 0.6);
     const pup  = mesh(new THREE.SphereGeometry(0.016, 10, 10), lash, s*0.105, 2.042, 0.290, g);
+    eyes.push(eye); irises.push(iris);
     const brow = mesh(new THREE.BoxGeometry(0.095, 0.019, 0.019), lash, s*0.105, 2.145, 0.252, g);
     brow.rotation.z = s * -0.13;
     // üst kirpik
@@ -1095,7 +1105,7 @@ function makeRunner(){
   bag.rotation.x = 0.10;
   g.add(bag);
 
-  return {g, armL, armR, handL, handR, legL:null, legR:null, head, torso, bag};
+  return {g, armL, armR, handL, handR, legL:null, legR:null, head, torso, bag, eyes, irises};
 }
 
 /* ---------- PASTA KUTUSU ---------- */
@@ -1717,6 +1727,23 @@ function buildHome(){
       world.lampLights++;
     }
   }
+  /* ═══ AİLE FOTOĞRAF DUVARI ═══
+     Evin ön cephesinde (pencerelerin arası) Derin'in gerçek fotoğrafları.
+     Eve gelince ailesinin fotoğraflarına bakıyor — hikayenin duygusal payı. */
+  const frameMat = new THREE.MeshStandardMaterial({color:0x8a6a4a, roughness:0.6, metalness:0.15});
+  const texLoader = new THREE.TextureLoader();
+  for(let i=0;i<4;i++){
+    const fx = X + 7.2 + i*1.65;
+    mesh(new THREE.BoxGeometry(1.45, 1.8, 0.10), frameMat, fx, 5.6, -4.32);
+    const t = texLoader.load(`assets/photos/can-${i+1}.jpg`, tx=>{ tx.colorSpace = THREE.SRGBColorSpace; });
+    mesh(new THREE.PlaneGeometry(1.22, 1.56),
+      new THREE.MeshStandardMaterial({map:t, roughness:0.85, emissive:0xffffff, emissiveIntensity:0.18}),
+      fx, 5.6, -4.25);
+  }
+  const shelfLight = new THREE.PointLight(0xffd9a0, 12, 9, 2);
+  shelfLight.position.set(X+9.8, 7.4, -3.4);
+  scene.add(shelfLight);
+
   // yol tarafi: kapi onundeki hedef noktasi (yolun uzerinde)
   checkpoint(X+2, 0);
   world.goal = {x:X+8, z:0};
@@ -2335,6 +2362,35 @@ function physics(dt){
   P.anim += P.speed*dt*2.4;
   runner.g.position.y = p.y + (P.grounded? Math.sin(P.anim*2)*0.05 : 0);
   runner.g.rotation.y = visualYaw;
+
+  /* ═══ KARAKTER CANLILIĞI ═══
+     • Göz kırpma (rastgele aralıkla)
+     • Gözler kameranın baktığı yöne kayar (bakis)
+     • Baş mikro hareketi (nefes + dengesizlik) */
+  const t = P.anim;
+  // kirpma: ortalama 3.5 saniyede bir, 120ms kapalı
+  P.blinkT = (P.blinkT||0) - dt;
+  if(P.blinkT <= 0){ P.blinkT = 2.4 + Math.random()*3.4; P.blinkOn = 0.13; }
+  const blinking = (P.blinkOn||0) > 0;
+  if(blinking) P.blinkOn -= dt;
+  const lid = blinking ? 0.12 : 1;
+  runner.eyes.forEach(e => e.scale.y = 1.12 * lid);
+
+  // bakis: kameranin yonune kayan gozler (max 0.03 birim)
+  const lookX = Math.max(-1, Math.min(1, Math.sin(cam.yaw - visualYaw))) * 0.028;
+  const lookY = Math.max(-1, Math.min(1, cam.pitch * 0.7)) * 0.018;
+  runner.irises.forEach(ir => {
+    ir.position.x = (ir.position.x > 0 ? 0.105 : -0.105) + lookX;
+    ir.position.y = 2.042 + lookY;
+  });
+
+  // bas mikro hareketi (nefes + denge sarsintisi)
+  const breathe = Math.sin(t*1.7)*0.008;
+  const wobble = Math.sin(t*4.3)*P.balance*0.05;
+  runner.head.position.y = 1.99 + breathe + wobble;
+  runner.head.rotation.z = Math.sin(t*0.9)*0.035 + P.balance*0.10;
+  runner.head.rotation.x = Math.sin(t*1.3)*0.02 - cam.pitch*0.10;
+
   dust.update(dt, p.x);
 
   /* Temas gölgesini oyuncunun altinda tut (zemin yuksekligine uygun olcek) */
