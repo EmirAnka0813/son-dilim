@@ -70,10 +70,10 @@ const URL = process.argv[2] || 'http://127.0.0.1:8790/index.html';
   await page.waitForTimeout(400);
   const b0 = d.balance;
   await page.evaluate(() => window.__key('KeyE', true));
-  await page.waitForTimeout(2000);
+  await page.waitForTimeout(1400);
   const bE = await page.evaluate(() => window.__dbg().balance);
   await page.evaluate(() => window.__key('KeyE', false));
-  check('Q/E pastayi egdiriyor', bE > b0 + 0.15, `balance ${b0} -> ${bE}`);
+  check('Q/E pastayi egdiriyor', bE > b0 + 0.09, `balance ${b0} -> ${bE}`);
 
   // --- 4b) SAG TUŞ sürükle kamerayi dondurur ---
   const cam0 = await page.evaluate(() => window.__camYaw());

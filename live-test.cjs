@@ -44,18 +44,24 @@ const URL = process.argv[2] || 'https://emiranka0813.github.io/son-dilim/';
   ck('Hiz dogru', d.speed > 8, String(d.speed));
 
   // Roblox tarzi: Q/E pasta egdirir, fare kamerayi dondurur
-  const b0 = d.balance;
+  await p.evaluate(() => window.__key('KeyE', false));
+  await p.evaluate(() => window.__key('KeyQ', false));
+  await p.waitForTimeout(1800);              // denge sifirlansin
+  const b0 = (await p.evaluate(() => window.__dbg())).balance;
   await p.evaluate(() => window.__key('KeyE', true));
-  await p.waitForTimeout(1000);
+  await p.waitForTimeout(1200);
   const bE = await p.evaluate(() => window.__dbg().balance);
   await p.evaluate(() => window.__key('KeyE', false));
-  ck('Q/E pastayi egdiriyor', bE > b0 + 0.08, `${b0} -> ${bE}`);
+  ck('Q/E pastayi egdiriyor', bE > b0 + 0.15, `${b0.toFixed(2)} -> ${bE.toFixed(2)}`);
 
   const cam0 = await p.evaluate(() => window.__camYaw());
-  await p.mouse.move(1200, 405);
-  await p.waitForTimeout(500);
+  await p.mouse.move(720, 405);
+  await p.mouse.down({ button: 'right' });
+  await p.mouse.move(960, 405, { steps: 12 });
+  await p.waitForTimeout(200);
+  await p.mouse.up({ button: 'right' });
   const cam1 = await p.evaluate(() => window.__camYaw());
-  ck('Fare kamerayi donduruyor', Math.abs(cam1 - cam0) > 0.03, `yaw ${cam0} -> ${cam1}`);
+  ck('Sag tus kamerayi donduruyor', Math.abs(cam1 - cam0) > 0.15, `yaw ${cam0} -> ${cam1}`);
 
   // kaza
   await p.evaluate(() => window.__crash());

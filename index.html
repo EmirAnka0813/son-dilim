@@ -637,6 +637,7 @@ const TEXTURES = {
 };
 
 function applyTexture(mat, tex, cfg){
+  if(!mat || !tex) return;
   tex.colorSpace = THREE.SRGBColorSpace;
   tex.wrapS = tex.wrapT = THREE.RepeatWrapping;
   tex.repeat.set(cfg.repeat[0], cfg.repeat[1]);
@@ -647,12 +648,24 @@ function applyTexture(mat, tex, cfg){
   mat.needsUpdate = true;
 }
 
+/* Zemin UV'sini gerçek boyuta göre ölçekle (doku her yerde aynı ölçek).
+   BoxGeometry UV 0..1 -> X yönünde w, Z yönünde depth birimde bir doku. */
+function scaleFloorUV(m, w, depth, tile){
+  const uv = m.geometry.attributes.uv;
+  for(let i=0;i<uv.count;i++){
+    uv.setXY(i, uv.getX(i)*w/tile, uv.getY(i)*depth/tile);
+  }
+  uv.needsUpdate = true;
+}
+
 function loadTextures(){
   const loader = new THREE.TextureLoader();
-  const map = { asphalt:M.asphalt, sidewalk:M.sidewalk, building:M.building };
+  const texMap = { asphalt:M.asphalt, sidewalk:M.sidewalk, building:M.building };
   for(const key in TEXTURES){
     const cfg = TEXTURES[key];
-    loader.load(cfg.url, tex=>applyTexture(map[key], tex, cfg),
+    const mat = texMap[key];
+    if(!mat){ console.warn('doku hedefi yok:', key); continue; }
+    loader.load(cfg.url, tex=>applyTexture(mat, tex, cfg),
       undefined, ()=>console.warn('doku yok (prosedürel kalıyor):', cfg.url));
   }
 }
@@ -758,6 +771,7 @@ function road(x, w, depth=22, withReflector=true){
   for (const s of [-1, 1]){
     const sw = mesh(new THREE.BoxGeometry(w, 0.34, 3.4), M.sidewalk,
       x+w/2, 0.17, s*(depth/2 - 1.7));
+    if(M.sidewalk.map) scaleFloorUV(sw, w, 3.4, 2.2);   // 2.2 birimde bir kaldirim tası
     world.solids.push({x, w, y:0.34, h:0.34, mesh:sw, isFloor:true});
     // kaldırım kenarı (gri bant)
     mesh(new THREE.BoxGeometry(w, 0.06, 0.28), M.curb, x+w/2, 0.36, s*(depth/2 - 3.25));
@@ -840,6 +854,7 @@ function building(x, w, h, z, mat){
 
   // ana gövde
   const body = mesh(new THREE.BoxGeometry(w, h, 10), renk, merkeziX, h/2, z, g);
+  if(renk.map) scaleFloorUV(body, w, h, 5);   // 5 birimde bir doku (cephe)
   // köşe sütunları (gölge kırılımı için)
   for (const s of [-1,1]){
     mesh(new THREE.BoxGeometry(0.5, h, 10.4),
@@ -2100,9 +2115,10 @@ function physics(dt){
   // klavye yoksa hedef 0 (kutu ortada kalir, sadece sarsıntıyla oynar)
   const target = tilt;
 
-  /* Sarkac: sert ama KONTROLLU. Kucuk k = yavas toparlanma, yuksek damp = titresiz.
-     Amac: oyuncu 9 yasinda, tusu biraz basip biraktiginda denge geri gelmeli. */
-  const k = 9.5, damp = 3.6;
+  /* Sarkac: sert ama KONTROLLU.
+     k=16, damp=6 -> periyot ~1.6s, yarim sonumlu. Tusu birakince ~1s'de
+     denge geri gelir; cok uzun sure beklemeden tepki verir. */
+  const k = 16, damp = 6.0;
   // ivme etkisi: kutu hareket yonunde hafifce geriye itilir
   const accelX = (P.vel.x - (P.velPrevX||0))/Math.max(dt,0.001);
   const accelZ = (P.vel.z - (P.velPrevZ||0))/Math.max(dt,0.001);
