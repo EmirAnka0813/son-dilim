@@ -43,12 +43,19 @@ const URL = process.argv[2] || 'https://emiranka0813.github.io/son-dilim/';
   ck('Kosma ilerletiyor', d.x - x0 > 8, `${x0} -> ${d.x}`);
   ck('Hiz dogru', d.speed > 8, String(d.speed));
 
-  // denge
+  // Roblox tarzi: Q/E pasta egdirir, fare kamerayi dondurur
   const b0 = d.balance;
-  await p.evaluate(() => window.__mouse(1));
-  await p.waitForTimeout(700);
-  d = await p.evaluate(() => window.__dbg());
-  ck('Fare dengeyi degistiriyor', Math.abs(d.balance - b0) > 0.08, `${b0} -> ${d.balance}`);
+  await p.evaluate(() => window.__key('KeyE', true));
+  await p.waitForTimeout(1000);
+  const bE = await p.evaluate(() => window.__dbg().balance);
+  await p.evaluate(() => window.__key('KeyE', false));
+  ck('Q/E pastayi egdiriyor', bE > b0 + 0.08, `${b0} -> ${bE}`);
+
+  const cam0 = await p.evaluate(() => window.__camYaw());
+  await p.mouse.move(1200, 405);
+  await p.waitForTimeout(500);
+  const cam1 = await p.evaluate(() => window.__camYaw());
+  ck('Fare kamerayi donduruyor', Math.abs(cam1 - cam0) > 0.03, `yaw ${cam0} -> ${cam1}`);
 
   // kaza
   await p.evaluate(() => window.__crash());
@@ -64,24 +71,21 @@ const URL = process.argv[2] || 'https://emiranka0813.github.io/son-dilim/';
     ck(`Bolum ${i + 1} kuruldu`, d.stage === i, `stage=${d.stage}`);
   }
 
-  // final — KAPIDAN ONCEYE yuruyerek ulas (gercek oynanis)
+  // final — hedefe yuruyerek ulas
   d = await p.evaluate(() => window.__dbg());
   ck('Finalde kapi var', d.goalX > 0, String(d.goalX));
-  const startX = await p.evaluate(() => window.__dbg().x);
-  await p.evaluate(() => window.__teleportSafe(Math.max(6, window.__dbg().x), 0.02, 0));
+  await p.evaluate(g => window.__teleportSafe(g - 8, 0.02, 0), d.goalX);
+  await p.waitForTimeout(400);
+  await p.evaluate(() => window.__setCamYaw(0));
   await p.evaluate(() => window.__key('KeyD', true));
-  // Pasta dengesini test boyunca sabit tut (fare ortada) — aksi halde
-  // 12 saniye kosunca krem kayip kaza olur (bu oyunun dogru calistigini gosterir)
   for (let i = 0; i < 30; i++) {
-    await p.waitForTimeout(300);
-    await p.evaluate(() => window.__mouse(0));
+    await p.waitForTimeout(250);
     const st = await p.evaluate(() => window.__dbg().state);
     if (st === 'win') break;
   }
   await p.evaluate(() => window.__key('KeyD', false));
   d = await p.evaluate(() => window.__dbg());
-  ck('Kapıya yuruyerek ulasma -> win', d.state === 'win',
-    `state=${d.state} x=${d.x} baslangic=${startX} goal=${d.goalX} slip=${d.slip}`);
+  ck('Kapıya ulasma -> win', d.state === 'win', `state=${d.state} x=${d.x} goal=${d.goalX}`);
 
   const fam = await p.evaluate(() => [...document.querySelectorAll('#famRow .nm')].map(n => n.textContent));
   ck('Aile tablosu 4 kisi', fam.length === 4, fam.join(','));

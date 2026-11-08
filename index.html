@@ -941,21 +941,30 @@ let segStart = 0;
 
 function buildStage(idx){
   // temizle
-  for(const s of world.solids) if(s.mesh) scene.remove(s.mesh);
-  for(const h of world.hazards) if(h.mesh) scene.remove(h.mesh);
-  for(const m of world.movers) if(m.g) scene.remove(m.g);
-  for(const c of world.checkpoints) if(c.g) scene.remove(c.g);
-  for(const c of world.crowd) if(c.g) scene.remove(c.g);
-  for(const c of world.cars) if(c.g) scene.remove(c.g);
-  for(const d of world.dogs) if(d.g) scene.remove(d.g);
-  for(const s of world.skaters) if(s.g) scene.remove(s.g);
-  world.goal = null;
-  world.wet = null;
+  /* Temizlik: bolumden bolume gecerken ESKI objeler sahne de kalmamali.
+     (Kalabalik/araç/köpek temizlenmezse yeni bolumde capraz carpisma -> kaza) */
+  const drop = o => { if(o) scene.remove(o); };
+  world.solids.forEach(s => drop(s.mesh));
+  world.hazards.forEach(h => drop(h.mesh));
+  world.movers.forEach(m => drop(m.g));
+  world.checkpoints.forEach(c => drop(c.g));
+  world.crowd.forEach(c => drop(c.g));
+  world.cars.forEach(c => drop(c.g));
+  world.dogs.forEach(d => drop(d.g));
+  world.skaters.forEach(s => drop(s.g));
+  world.props.forEach(drop);
+
+  world.goal = null; world.wet = null; world.reflector = null;
   world.solids.length=0; world.hazards.length=0; world.movers.length=0;
   world.checkpoints.length=0; world.crowd.length=0; world.cars.length=0;
   world.dogs.length=0; world.skaters.length=0; world.ramps.length=0;
-  for(const o of world.props) scene.remove(o);
   world.props.length=0;
+
+  /* Sahnedeki isiklari temizle (PointLight birikmemesin -> performans) */
+  for(let i=scene.children.length-1; i>=0; i--){
+    const o = scene.children[i];
+    if(o.isPointLight) scene.remove(o);
+  }
   stageIdx = idx;
   segStart = segStart===0 ? 0 : stageLen;
   const tip = STAGES[idx].tip;
@@ -972,7 +981,7 @@ function buildStage(idx){
 function buildOffice(){
   const X = 0;
   // ofis zemini
-  floor(X, 46, M.office, 0, 20);
+  floor(X - 6, 52, M.office, 0, 20);
   // koridor duvarları
   hazard(X, 1.2, 5, -8, M.building);
   hazard(X+44.8, 1.2, 5, -8, M.building);
@@ -1066,7 +1075,7 @@ function makeCar(type, colorMat){
 
 function buildStreet(){
   const X = stageLen - 4;   // onki bolumle overlap
-  road(X, 120, 22);         // asfalt + kaldirim + yansima + cizgiler
+  road(X - 6, 126, 22);         // asfalt + kaldirim + yansima + cizgiler
 
   /* ── BİNALAR: iki sıra, farklı yükseklik ve renk ── */
   for(let i=0;i<10;i++){
@@ -1199,7 +1208,7 @@ function crateStack(x, z){
 
 function buildMetro(){
   const X = stageLen - 4;
-  floor(X, 90, M.sidewalk, 0, 20);
+  floor(X - 6, 96, M.sidewalk, 0, 20);
   // platform
   mesh(new THREE.BoxGeometry(80,1.2,10), M.sidewalk, X+40, 0.6, 0);
   world.solids.push({x:X, w:80, y:1.2, h:1.2});
@@ -1226,7 +1235,7 @@ function buildMetro(){
 
 function buildNeighborhood(){
   const X = stageLen - 4;
-  floor(X, 110, M.asphalt, 0, 20);
+  floor(X - 6, 116, M.asphalt, 0, 20);
   // evler
   for(let i=0;i<8;i++){
     const hx = X+8+i*13;
@@ -1263,7 +1272,9 @@ function buildNeighborhood(){
 
 function buildHome(){
   const X = stageLen - 4;
-  floor(X, 40, M.sidewalk, 0, 20);
+  // Zemin bolumun BASLANGICINDAN itibaren var olmali: oyuncu X-2'den
+  // geliyorsa altinda zemin bulunmali, yoksa duser.
+  floor(X - 6, 46, M.sidewalk, 0, 20);
   /* EV — yolun SAGINDA, oyuncu yolda kalir (evin icine girmeye calismaz) */
   const house = mesh(new THREE.BoxGeometry(13,8.5,11), M.cake, X+11, 4.25, -10);
   mesh(new THREE.BoxGeometry(13.6,0.7,11.6), M.cream, X+11, 8.85, -10);
