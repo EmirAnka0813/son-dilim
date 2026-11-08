@@ -1983,11 +1983,12 @@ window.__charYaw = ()=>+P.yaw.toFixed(4);
 window.__setCamYaw = (v)=>{ cam.yaw = v; };
 window.__teleport = (x,z=0,y=0)=>{ runner.g.position.set(x,y,z); P.vel.set(0,0,0); };
 window.__stage = (i)=>{
-  const prevLen = stageLen;
+  // Test icin izole kurulum: onceki bolumlerin birikmis stageLen'ini sifirla.
+  segStart = 0; stageLen = 0;
   buildStage(i);
   // oyuncuyu bu bolumun baslangicina tasi (yoksa bosluga dusuyor)
-  runner.g.position.set(Math.max(6, prevLen - 3), 0.02, 0);
-  P.vel.set(0,0,0); P.slip=0; P.grounded=true;
+  runner.g.position.set(Math.max(6, segStart - 3), 0.02, 0);
+  P.vel.set(0,0,0); P.slip=0; P.grounded=true; P.balance=0; P.balanceVel=0;
 };
 window.__setTime = (t)=>{ timeLeft=t; };
 window.__crash = ()=>{ P.slip=1; };
