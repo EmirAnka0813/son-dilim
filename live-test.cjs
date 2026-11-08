@@ -64,13 +64,24 @@ const URL = process.argv[2] || 'https://emiranka0813.github.io/son-dilim/';
     ck(`Bolum ${i + 1} kuruldu`, d.stage === i, `stage=${d.stage}`);
   }
 
-  // final
+  // final — KAPIDAN ONCEYE yuruyerek ulas (gercek oynanis)
   d = await p.evaluate(() => window.__dbg());
   ck('Finalde kapi var', d.goalX > 0, String(d.goalX));
-  await p.evaluate(x => window.__teleportSafe(x, 0.02, 0), d.goalX);
-  await p.waitForTimeout(1400);
+  const startX = await p.evaluate(() => window.__dbg().x);
+  await p.evaluate(() => window.__teleportSafe(Math.max(6, window.__dbg().x), 0.02, 0));
+  await p.evaluate(() => window.__key('KeyD', true));
+  // Pasta dengesini test boyunca sabit tut (fare ortada) — aksi halde
+  // 12 saniye kosunca krem kayip kaza olur (bu oyunun dogru calistigini gosterir)
+  for (let i = 0; i < 30; i++) {
+    await p.waitForTimeout(300);
+    await p.evaluate(() => window.__mouse(0));
+    const st = await p.evaluate(() => window.__dbg().state);
+    if (st === 'win') break;
+  }
+  await p.evaluate(() => window.__key('KeyD', false));
   d = await p.evaluate(() => window.__dbg());
-  ck('Kapıya ulasma -> win', d.state === 'win', d.state);
+  ck('Kapıya yuruyerek ulasma -> win', d.state === 'win',
+    `state=${d.state} x=${d.x} baslangic=${startX} goal=${d.goalX} slip=${d.slip}`);
 
   const fam = await p.evaluate(() => [...document.querySelectorAll('#famRow .nm')].map(n => n.textContent));
   ck('Aile tablosu 4 kisi', fam.length === 4, fam.join(','));

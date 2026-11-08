@@ -23,33 +23,50 @@
   .glass{background:var(--panel);border:1px solid var(--edge);backdrop-filter:blur(10px);
     border-radius:14px;box-shadow:0 8px 30px rgba(0,0,0,.45)}
 
-  /* Süre — sağ üst */
-  #timer{position:absolute;top:18px;right:18px;padding:11px 18px;min-width:132px;text-align:center}
-  #timeVal{font-size:38px;font-weight:800;line-height:1;letter-spacing:1px;font-variant-numeric:tabular-nums}
-  #timeLbl{font-size:11px;letter-spacing:2.6px;color:var(--dim);margin-top:3px;font-family:'Segoe UI',system-ui,sans-serif;font-weight:600}
-  #timer.warn #timeVal{color:var(--gold)}
-  #timer.crit #timeVal{color:var(--bad);animation:pulse .55s infinite alternate}
-  @keyframes pulse{to{transform:scale(1.09);text-shadow:0 0 26px rgba(255,95,86,.85)}}
+  /* ═══ SÜRE — üst orta (referans düzeni) ═══ */
+  #timer{position:absolute;top:0;left:50%;transform:translateX(-50%);text-align:center;
+    padding:8px 26px 12px;background:linear-gradient(180deg,rgba(10,6,20,.92),rgba(10,6,20,0));
+    min-width:230px}
+  #timeLbl{font-family:var(--font);font-size:19px;font-weight:900;letter-spacing:2.5px;
+    color:#fff;text-shadow:0 2px 10px rgba(0,0,0,.9),0 0 22px rgba(255,90,176,.5);line-height:1.05}
+  #timeVal{font-family:var(--font);font-size:46px;font-weight:900;line-height:.96;letter-spacing:1px;
+    font-variant-numeric:tabular-nums;color:#ffdfee;
+    text-shadow:0 3px 16px rgba(0,0,0,.95),0 0 34px rgba(255,90,176,.75);margin:1px 0 5px}
+  #timer.warn #timeVal{color:var(--gold);text-shadow:0 3px 16px rgba(0,0,0,.95),0 0 34px rgba(255,210,74,.8)}
+  #timer.crit #timeVal{color:#ff5f56;animation:pulse .5s infinite alternate}
+  @keyframes pulse{to{transform:scale(1.1);text-shadow:0 0 30px rgba(255,95,86,1),0 3px 16px rgba(0,0,0,.9)}}
 
-  /* Denge barı — alt orta */
-  #balance{position:absolute;bottom:22px;left:50%;transform:translateX(-50%);
-    width:290px;height:22px;padding:0;overflow:hidden}
-  #balTrack{position:absolute;inset:4px 10px;border-radius:9px;background:rgba(255,255,255,.09)}
-  #balSafe{position:absolute;top:4px;bottom:4px;left:38%;width:24%;border-radius:8px;
-    background:rgba(94,242,160,.13);border:1px solid rgba(94,242,160,.28)}
-  #balDot{position:absolute;top:3px;left:50%;width:16px;height:16px;margin-left:-8px;border-radius:50%;
-    background:var(--gold);box-shadow:0 0 14px rgba(255,210,74,.85);transition:background .15s}
-  #balDot.bad{background:var(--bad);box-shadow:0 0 16px rgba(255,95,86,.9)}
-  #balLbl{position:absolute;top:26px;left:0;right:0;text-align:center;font-size:10px;
-    letter-spacing:2.4px;color:var(--dim);font-family:'Segoe UI',system-ui,sans-serif;font-weight:600}
+  /* ═══ PASTA DENGE — süre altında (referans) ═══ */
+  #balance{position:absolute;top:112px;left:50%;transform:translateX(-50%);
+    width:330px;height:26px;padding:0;overflow:visible;
+    background:linear-gradient(180deg,rgba(8,5,16,.85),rgba(8,5,16,.55));
+    border:2px solid rgba(255,255,255,.42);border-radius:5px;
+    box-shadow:0 4px 18px rgba(0,0,0,.7),inset 0 1px 0 rgba(255,255,255,.18)}
+  #balTrack{position:absolute;inset:3px 6px;border-radius:3px;background:rgba(255,255,255,.10);
+    overflow:hidden}
+  #balSafe{position:absolute;top:3px;bottom:3px;left:38%;width:24%;
+    background:linear-gradient(180deg,rgba(255,210,74,.55),rgba(255,160,40,.35));
+    border-left:1px solid rgba(255,255,255,.28);border-right:1px solid rgba(255,255,255,.28)}
+  #balDot{position:absolute;top:-4px;left:50%;width:22px;height:30px;margin-left:-11px;
+    border-radius:4px;background:linear-gradient(180deg,#fff2b8,#ffb63d);
+    border:2px solid rgba(70,40,0,.75);box-shadow:0 0 18px rgba(255,200,60,.9);
+    transition:background .12s;z-index:2}
+  #balDot.bad{background:linear-gradient(180deg,#ffb0a8,#ff4a3d);
+    box-shadow:0 0 22px rgba(255,80,60,1);animation:shakeDot .16s infinite}
+  @keyframes shakeDot{0%,100%{transform:translateX(0)}50%{transform:translateX(2px)}}
+  #balLbl{position:absolute;top:28px;left:0;right:0;text-align:center;font-family:var(--font);
+    font-size:12px;font-weight:800;letter-spacing:3.4px;color:#ffd6ec;
+    text-shadow:0 2px 8px rgba(0,0,0,.9)}
+
 
   /* Can / hediye — sol üst */
   #left{position:absolute;top:18px;left:18px;display:flex;gap:10px;align-items:center}
   #lives{display:flex;gap:5px;padding:10px 13px}
   .lv{width:15px;height:15px}
   #giftIco{width:34px;height:34px;padding:7px;display:none}
-  #stage{position:absolute;top:66px;left:18px;padding:8px 14px;font-size:13px;
-    letter-spacing:1.4px;color:var(--pink-l);font-weight:700}
+  #stage{position:absolute;top:14px;left:18px;padding:7px 13px;font-size:12px;
+    letter-spacing:2px;color:var(--pink-l);font-weight:800;font-family:var(--font);
+    text-shadow:0 2px 8px rgba(0,0,0,.8);background:rgba(12,8,22,.72)}
 
   /* Mesaj / ipucu — üst orta */
   #toast{position:absolute;top:96px;left:50%;transform:translateX(-50%) translateY(-14px);
@@ -153,10 +170,17 @@
     </div>
   </div>
   <div id="stage" class="glass">BÖLÜM 1 — OFİSTEN KAÇIŞ</div>
-  <div id="timer" class="glass"><div id="timeVal">20:00</div><div id="timeLbl">KALAN SÜRE</div></div>
-  <div id="balance" class="glass">
+
+  <!-- SÜRE: üst orta (referans) -->
+  <div id="timer">
+    <div id="timeLbl">SON DİLİM</div>
+    <div id="timeVal">20:00</div>
+  </div>
+
+  <!-- PASTA DENGE: sürenin altında -->
+  <div id="balance">
     <div id="balTrack"></div><div id="balSafe"></div><div id="balDot"></div>
-    <div id="balLbl">PASTA DENGESİ</div>
+    <div id="balLbl">PASTA DENGE</div>
   </div>
   <div id="toast" class="glass"></div>
   <div id="prompt"></div>
@@ -254,8 +278,16 @@
   <div style="font-size:12px;letter-spacing:3px;color:var(--dim)">HAZIRLANIYOR…</div>
 </div>
 
+<script type="importmap">
+{ "imports": { "three": "./lib/three.module.js" } }
+</script>
 <script type="module">
 import * as THREE from './lib/three.module.js';
+import { EffectComposer } from './lib/addons/EffectComposer.js';
+import { RenderPass } from './lib/addons/RenderPass.js';
+import { ShaderPass } from './lib/addons/ShaderPass.js';
+import { UnrealBloomPass } from './lib/addons/UnrealBloomPass.js';
+import { OutputPass } from './lib/addons/OutputPass.js';
 
 /* ══════════════════════════════════════════════════════════
    SON DİLİM — 10 yaşına giren Derin için
@@ -282,33 +314,131 @@ renderer.setSize(innerWidth, innerHeight);
 renderer.shadowMap.enabled = true;
 renderer.shadowMap.type = THREE.PCFSoftShadowMap;
 renderer.toneMapping = THREE.ACESFilmicToneMapping;
-renderer.toneMappingExposure = 1.35;
+renderer.toneMappingExposure = 1.15;
 renderer.outputColorSpace = THREE.SRGBColorSpace;
 
 const scene = new THREE.Scene();
-scene.fog = new THREE.FogExp2(0x3a2a5e, 0.0055);
-scene.background = new THREE.Color(0x2e2050);
 
 const camera = new THREE.PerspectiveCamera(60, innerWidth/innerHeight, 0.1, 800);
 
-/* ışıklar — separate add (chaining .position.set breaks) */
-const hemi = new THREE.HemisphereLight(0xdce8ff, 0x6b4a80, 1.5);
+/* ══════════════════════════════════════════════════════════
+   IŞIKLAR — gün batımı: sıcak ana (alçak açı) + soğuk dolgu
+   ══════════════════════════════════════════════════════════ */
+const hemi = new THREE.HemisphereLight(0x9fb8ff, 0x3d2a52, 0.85);
 scene.add(hemi);
 
-const sun = new THREE.DirectionalLight(0xfff2dc, 2.6);
-sun.position.set(-30, 46, 22);
+/* Ana ışık: alçak, sıcak, uzun gölgeler — akşam güneşi */
+const sun = new THREE.DirectionalLight(0xffb877, 3.1);
+sun.position.set(-42, 26, 30);
 sun.castShadow = true;
-sun.shadow.mapSize.set(2048,2048);
-sun.shadow.camera.near = 1; sun.shadow.camera.far = 160;
-sun.shadow.camera.left = -55; sun.shadow.camera.right = 55;
-sun.shadow.camera.top = 55;   sun.shadow.camera.bottom = -55;
-sun.shadow.bias = -0.0008; sun.shadow.normalBias = 0.04;
+sun.shadow.mapSize.set(4096,4096);
+sun.shadow.camera.near = 1; sun.shadow.camera.far = 180;
+sun.shadow.camera.left = -48; sun.shadow.camera.right = 48;
+sun.shadow.camera.top = 48;   sun.shadow.camera.bottom = -48;
+sun.shadow.bias = -0.0004; sun.shadow.normalBias = 0.025;
+sun.shadow.radius = 3;
 scene.add(sun);
 scene.add(sun.target);
 
-const rim = new THREE.DirectionalLight(0xff7ac4, 0.85);
-rim.position.set(24, 14, -26);
+/* Soğuk dolgu (gölgelerdeki mavi) */
+const fill = new THREE.DirectionalLight(0x6d8cff, 0.75);
+fill.position.set(30, 20, -24);
+scene.add(fill);
+
+/* Pembe rim — karakteri sahneden ayırır */
+const rim = new THREE.DirectionalLight(0xff6ab8, 1.15);
+rim.position.set(12, 16, -30);
 scene.add(rim);
+
+/* Ortam sisi — gün batımı sisi */
+scene.fog = new THREE.FogExp2(0x54406e, 0.0072);
+scene.background = new THREE.Color(0x3d2c58);
+
+/* Gökyüzü gradyanı (küre) */
+const skyGeo = new THREE.SphereGeometry(420, 32, 20);
+const skyMat = new THREE.ShaderMaterial({
+  side: THREE.BackSide, depthWrite:false, fog:false,
+  uniforms:{
+    uTop:{value:new THREE.Color(0x2a2350)},
+    uMid:{value:new THREE.Color(0x8a5a86)},
+    uBot:{value:new THREE.Color(0xff9a5c)},   // ufukta sicak turuncu
+    uSun:{value:new THREE.Vector3(-0.55,0.18,0.42).normalize()}
+  },
+  vertexShader:`
+    varying vec3 vDir;
+    void main(){ vDir=normalize(position); gl_Position=projectionMatrix*modelViewMatrix*vec4(position,1.0); }`,
+  fragmentShader:`
+    uniform vec3 uTop,uMid,uBot,uSun;
+    varying vec3 vDir;
+    void main(){
+      float h = clamp(vDir.y*0.5+0.5, 0.0, 1.0);
+      vec3 col = mix(uBot, uMid, smoothstep(0.42,0.58,h));
+      col = mix(col, uTop, smoothstep(0.55,0.92,h));
+      // gunes halesi
+      float d = max(dot(normalize(vDir), normalize(uSun)), 0.0);
+      col += vec3(1.0,0.62,0.28)*pow(d,14.0)*0.9;
+      col += vec3(1.0,0.5,0.2)*pow(d,3.0)*0.18;
+      gl_FragColor = vec4(col,1.0);
+    }`
+});
+const sky = new THREE.Mesh(skyGeo, skyMat);
+scene.add(sky);
+
+/* ── POST-PROCESSING: bloom + sinematik renk derecelendirme + vignette ── */
+const composer = new EffectComposer(renderer);
+composer.addPass(new RenderPass(scene, camera));
+
+const bloom = new UnrealBloomPass(
+  new THREE.Vector2(innerWidth, innerHeight),
+  0.42,   // strength  — neon tabelalar ve mumlar parlar
+  0.85,   // radius    — yumusak yayilim
+  0.72    // threshold — sadece parlak yerler
+);
+composer.addPass(bloom);
+
+/* Sinematik renk derecelendirme: sicak golge, soguk golge, kontrast, vignette */
+const GradeShader = {
+  uniforms: {
+    tDiffuse: {value:null},
+    uWarm:    {value:new THREE.Color(0xffd9a8)},  // sicak golge tonu
+    uCool:    {value:new THREE.Color(0x8fa8ff)},  // soguk golge tonu
+    uAmount:  {value:0.22},   // split-tone gucu
+    uContrast:{value:1.09},   // kontrast
+    uSat:     {value:1.14},   // doygunluk
+    uVignette:{value:0.42},   // kenar karartma
+    uTime:    {value:0}
+  },
+  vertexShader: `
+    varying vec2 vUv;
+    void main(){ vUv=uv; gl_Position=projectionMatrix*modelViewMatrix*vec4(position,1.0); }`,
+  fragmentShader: `
+    uniform sampler2D tDiffuse;
+    uniform vec3 uWarm, uCool;
+    uniform float uAmount, uContrast, uSat, uVignette, uTime;
+    varying vec2 vUv;
+    void main(){
+      vec4 c = texture2D(tDiffuse, vUv);
+      float lum = dot(c.rgb, vec3(0.2126,0.7152,0.0722));
+      // split-tone: golgelere soguk, isiklara sicak
+      vec3 tone = mix(uCool, uWarm, smoothstep(0.15,0.75,lum));
+      c.rgb = mix(c.rgb, c.rgb*tone, uAmount);
+      // kontrast (0.5 pivot)
+      c.rgb = (c.rgb-0.5)*uContrast+0.5;
+      // doygunluk
+      c.rgb = mix(vec3(lum), c.rgb, uSat);
+      // vignette
+      vec2 d = vUv-0.5;
+      float vig = 1.0 - uVignette*dot(d,d)*2.2;
+      c.rgb *= clamp(vig,0.0,1.0);
+      // ince film grain
+      float g = fract(sin(dot(vUv*vec2(1234.5,5678.9)+uTime, vec2(12.9898,78.233)))*43758.5453);
+      c.rgb += (g-0.5)*0.018;
+      gl_FragColor = vec4(clamp(c.rgb,0.0,1.0), c.a);
+    }`
+};
+const gradePass = new ShaderPass(GradeShader);
+composer.addPass(gradePass);
+composer.addPass(new OutputPass());
 
 /* ══════════════════════════════════════════════════════════
    2. MALZEMELER
@@ -341,6 +471,8 @@ const M = {
   gift    : new THREE.MeshStandardMaterial({color:0xff5ab0, roughness:0.35, metalness:0.2}),
   ribbon  : new THREE.MeshStandardMaterial({color:0xffd24a, roughness:0.3, metalness:0.5,
              emissive:0x6b4d00, emissiveIntensity:0.5}),
+  bag     : new THREE.MeshStandardMaterial({color:0x6b4a35, roughness:0.9}),
+  bagDark : new THREE.MeshStandardMaterial({color:0x4a3223, roughness:0.92}),
   dog     : new THREE.MeshStandardMaterial({color:0x8a6440, roughness:0.85}),
   veg1    : new THREE.MeshStandardMaterial({color:0xff6b4a, roughness:0.7}),
   veg2    : new THREE.MeshStandardMaterial({color:0x5ec98a, roughness:0.7}),
@@ -398,80 +530,150 @@ function building(x,w,h,z,mat){
   return m;
 }
 
-/* ---------- KARAKTER: Abla (pembe elbise, uzun dalgalı saç) ---------- */
+/* ══════════════════════════════════════════════════════════════════════
+   KARAKTER — stilize sinematik (Pixar-esque)
+   Proporsiyon: 5.2 kafa birimi, geniş omuz, küçük el/ayak (çocuk hissi)
+   ══════════════════════════════════════════════════════════════════════ */
 function makeRunner(){
   const g = new THREE.Group();
-  const skin = M.skin, dress = M.dress, hair = M.hairF;
+  const skin = M.skin, dress = M.dress, hair = M.hairF, dark = M.dark;
 
-  // A elbise — belden genişleyen koni
-  const torso = mesh(new THREE.CylinderGeometry(0.30, 0.60, 1.30, 20), dress, 0, 1.02, 0, g);
-  const chest = mesh(new THREE.CylinderGeometry(0.30, 0.34, 0.42, 18), dress, 0, 1.52, 0, g);
-  const shoulders = mesh(new THREE.SphereGeometry(0.30, 16, 12), dress, 0, 1.68, 0, g);
-  shoulders.scale.set(1.15, 0.55, 0.80);
+  /* ── gövde: A elbise, omuzdan etek ucuna yumuşak koni ── */
+  const torso = mesh(new THREE.CylinderGeometry(0.30, 0.56, 1.02, 24), dress, 0, 1.05, 0, g);
+  torso.scale.set(1.0, 1.0, 0.78);                 // gövde yassın (ön-arka)
+  const chest = mesh(new THREE.CylinderGeometry(0.27, 0.31, 0.40, 22), dress, 0, 1.46, 0, g);
+  chest.scale.set(1, 1, 0.80);
+  const hips  = mesh(new THREE.CylinderGeometry(0.34, 0.40, 0.24, 22), dress, 0, 0.58, 0, g);
+  hips.scale.set(1, 1, 0.82);
+  // omuzlar — yumuşak küre
+  const shoulders = mesh(new THREE.SphereGeometry(0.30, 20, 14), dress, 0, 1.60, 0, g);
+  shoulders.scale.set(1.22, 0.62, 0.82);
+  // bel kordonu
+  const belt = mesh(new THREE.TorusGeometry(0.335, 0.028, 8, 24), M.ribbon, 0, 0.70, 0, g);
+  belt.rotation.x = Math.PI/2; belt.scale.set(1, 0.82, 1);
 
-  // kollar (pembe kısa kol → ten rengi önkollar)
-  const armLU = mesh(new THREE.CapsuleGeometry(0.095, 0.30, 4, 10), dress, -0.38, 1.52, 0, g);
-  const armRU = mesh(new THREE.CapsuleGeometry(0.095, 0.30, 4, 10), dress,  0.38, 1.52, 0, g);
-  const armL = mesh(new THREE.CapsuleGeometry(0.085, 0.52, 4, 10), skin, -0.42, 1.10, 0, g);
-  const armR = mesh(new THREE.CapsuleGeometry(0.085, 0.52, 4, 10), skin,  0.42, 1.10, 0, g);
-  const handL= mesh(new THREE.SphereGeometry(0.105, 10, 8), skin, -0.44, 0.80, 0, g);
-  const handR= mesh(new THREE.SphereGeometry(0.105, 10, 8), skin,  0.44, 0.80, 0, g);
+  /* ── kollar: kısa kol (pembe) + ten rengi önkollar ── */
+  const armLU = mesh(new THREE.CapsuleGeometry(0.092, 0.26, 5, 12), dress, -0.36, 1.46, 0, g);
+  const armRU = mesh(new THREE.CapsuleGeometry(0.092, 0.26, 5, 12), dress,  0.36, 1.46, 0, g);
+  const armL = mesh(new THREE.CapsuleGeometry(0.078, 0.50, 5, 12), skin, -0.40, 1.06, 0, g);
+  const armR = mesh(new THREE.CapsuleGeometry(0.078, 0.50, 5, 12), skin,  0.40, 1.06, 0, g);
+  armL.rotation.z =  0.14;  armR.rotation.z = -0.14;
+  const handL = mesh(new THREE.SphereGeometry(0.095, 12, 10), skin, -0.42, 0.79, 0, g);
+  const handR = mesh(new THREE.SphereGeometry(0.095, 12, 10), skin,  0.42, 0.79, 0, g);
+  handL.scale.set(0.85, 1.15, 0.75); handR.scale.set(0.85, 1.15, 0.75);
 
-  // boyun + baş
-  const neck = mesh(new THREE.CylinderGeometry(0.09,0.11,0.16,10), skin, 0, 1.82, 0, g);
-  const head = mesh(new THREE.SphereGeometry(0.30, 22, 18), skin, 0, 2.08, 0, g);
-  head.scale.set(0.93, 1.06, 0.94);
-  const nose = mesh(new THREE.SphereGeometry(0.055, 8, 8), skin, 0, 2.05, 0.28, g);
+  /* ── boyun + baş ── */
+  const neck = mesh(new THREE.CylinderGeometry(0.085, 0.105, 0.14, 14), skin, 0, 1.76, 0, g);
+  const head = mesh(new THREE.SphereGeometry(0.285, 28, 22), skin, 0, 1.99, 0, g);
+  head.scale.set(0.95, 1.10, 0.96);               // hafif dikey oval
+  // çene
+  const chin = mesh(new THREE.SphereGeometry(0.20, 18, 14), skin, 0, 1.90, 0.02, g);
+  chin.scale.set(0.92, 0.78, 0.94);
+  // burun
+  const nose = mesh(new THREE.SphereGeometry(0.048, 12, 10), skin, 0, 1.99, 0.265, g);
+  nose.scale.set(0.85, 1.0, 1.15);
 
-  // gözler + gülümseme
-  const eyeM = new THREE.MeshStandardMaterial({color:0x2b1a12, roughness:0.3});
-  for(const s of [-1,1]){
-    const eye = mesh(new THREE.SphereGeometry(0.048,12,10), eyeM, s*0.11, 2.12, 0.275, g);
-    const brow = mesh(new THREE.BoxGeometry(0.09,0.02,0.02), eyeM, s*0.11, 2.21, 0.275, g);
+  /* ── yüz: büyük gözler, kaş, gülümseme, yanak ── */
+  const eyeW = new THREE.MeshStandardMaterial({color:0xffffff, roughness:0.28});
+  const eyeI = new THREE.MeshStandardMaterial({color:0x4a2c1a, roughness:0.22});
+  const lash = new THREE.MeshStandardMaterial({color:0x24150e, roughness:0.4});
+  for (const s of [-1,1]){
+    const eye = mesh(new THREE.SphereGeometry(0.062, 16, 14), eyeW, s*0.105, 2.045, 0.235, g);
+    eye.scale.set(1, 1.12, 0.72);
+    const iris = mesh(new THREE.SphereGeometry(0.032, 14, 12), eyeI, s*0.105, 2.042, 0.272, g);
+    iris.scale.set(1, 1.1, 0.6);
+    const pup  = mesh(new THREE.SphereGeometry(0.016, 10, 10), lash, s*0.105, 2.042, 0.290, g);
+    const brow = mesh(new THREE.BoxGeometry(0.095, 0.019, 0.019), lash, s*0.105, 2.145, 0.252, g);
+    brow.rotation.z = s * -0.13;
+    // üst kirpik
+    const lid = mesh(new THREE.TorusGeometry(0.058, 0.011, 6, 14, Math.PI), lash, s*0.105, 2.055, 0.252, g);
+    lid.rotation.z = Math.PI;
+    // yanak
+    const cheek = mesh(new THREE.SphereGeometry(0.058, 12, 10),
+      new THREE.MeshStandardMaterial({color:0xff9fb0, roughness:0.85}),
+      s*0.175, 1.945, 0.185, g);
+    cheek.scale.set(1, 0.8, 0.35);
   }
-  const mouth = mesh(new THREE.TorusGeometry(0.07,0.017,8,16,Math.PI),
-    new THREE.MeshStandardMaterial({color:0xb04a5a, roughness:0.5}), 0, 1.99, 0.28, g);
-  mouth.rotation.z = Math.PI;
+  const mouth = mesh(new THREE.TorusGeometry(0.062, 0.016, 8, 18, Math.PI*0.95),
+    new THREE.MeshStandardMaterial({color:0xa83f52, roughness:0.42}), 0, 1.935, 0.258, g);
+  mouth.rotation.z = Math.PI*1.02;
+  // burun ucu parlamasi
+  const noseTip = mesh(new THREE.SphereGeometry(0.020, 10, 8),
+    new THREE.MeshStandardMaterial({color:0xffe4e0, roughness:0.35}), 0, 2.005, 0.305, g);
 
-  /* SAÇ — uzun, dalgalı, omuzdan aşağı */
-  const cap = mesh(new THREE.SphereGeometry(0.315, 22, 16, 0, Math.PI*2, 0, Math.PI*0.60), hair, 0, 2.12, 0, g);
-  const fringe = mesh(new THREE.SphereGeometry(0.30, 20, 14, 0, Math.PI*2, 0, Math.PI*0.40), hair, 0, 2.20, 0.09, g);
-  fringe.scale.set(1.0, 0.72, 1.0);
+  /* ── SAÇ: hacimli, dalgalı, omuz altı ── */
+  const cap = mesh(new THREE.SphereGeometry(0.305, 26, 18, 0, Math.PI*2, 0, Math.PI*0.58), hair, 0, 2.03, 0, g);
+  cap.scale.set(1.04, 1.02, 1.02);
+  // kâkül (ön saç)
+  const fringe = mesh(new THREE.SphereGeometry(0.30, 22, 16, 0, Math.PI*2, 0, Math.PI*0.44), hair, 0, 2.13, 0.075, g);
+  fringe.scale.set(1.02, 0.76, 1.04);
+  // yan perçemler
+  for (const s of [-1,1]){
+    const side = mesh(new THREE.SphereGeometry(0.115, 14, 12), hair, s*0.245, 2.00, 0.13, g);
+    side.scale.set(0.72, 1.55, 0.85);
+  }
 
+  /* dalgalı saç kilitleri — her biri segmentli, hacimli */
   const hairLock = (len, phase, mat)=>{
     const grp = new THREE.Group();
-    const segs = Math.max(5, Math.round(len/0.20));
+    const segs = Math.max(6, Math.round(len/0.185));
     for(let i=0;i<segs;i++){
       const t = i/segs;
-      const r = 0.19*(1 - t*0.55);
-      const seg = mesh(new THREE.SphereGeometry(r, 10, 8), mat,
-        Math.sin(t*7+phase)*0.085, -t*len, Math.cos(t*5+phase)*0.065 - t*0.10, grp);
-      seg.scale.set(1, 0.85, 1);
+      const r = 0.175*(1 - t*0.48);
+      const seg = mesh(new THREE.SphereGeometry(r, 12, 10), mat,
+        Math.sin(t*7.5+phase)*0.095,
+        -t*len,
+        Math.cos(t*5.5+phase)*0.075 - t*0.11, grp);
+      seg.scale.set(1, 0.88, 1);
     }
     return grp;
   };
-    for(let i=0;i<10;i++){
-    const a = (i/10)*Math.PI*2;
-    const lock = hairLock(1.45 + Math.sin(i*2.3)*0.30, i*1.7, hair);
-    lock.position.set(Math.cos(a)*0.25, 2.12, Math.sin(a)*0.23 - 0.06);
+  // arka saç halkasi
+  for(let i=0;i<11;i++){
+    const a = (i/11)*Math.PI*2;
+    const lock = hairLock(1.35 + Math.sin(i*2.1)*0.32, i*1.6, hair);
+    lock.position.set(Math.cos(a)*0.225, 2.03, Math.sin(a)*0.205 - 0.055);
     g.add(lock);
   }
-  // arka at kuyruğu
-  const tail = hairLock(1.15, 2.2, hair);
-  tail.position.set(0, 2.16, -0.29);
-  tail.scale.setScalar(1.15);
+  // at kuyruğu
+  const tail = hairLock(1.05, 2.4, hair);
+  tail.position.set(0, 2.08, -0.275);
+  tail.scale.setScalar(1.18);
   g.add(tail);
+  // topuz bantı
+  const tie = mesh(new THREE.TorusGeometry(0.085, 0.024, 8, 16), M.ribbon, 0, 1.94, -0.30, g);
+  tie.rotation.x = Math.PI/2;
 
-  /* ÇORAP + AYAKKABI (bastoncuk topuklu) */
+  /* ── ÇORAP + AYAKKABI (bastoncuk topuklu) ── */
   for(const s of [-1,1]){
-    const leg = mesh(new THREE.CapsuleGeometry(0.082, 0.58, 4, 10), M.sock, s*0.15, 0.42, 0, g);
-    const shoeBody = mesh(new THREE.BoxGeometry(0.19, 0.13, 0.32), M.shoe, s*0.15, 0.08, 0.05, g);
-    const heel = mesh(new THREE.BoxGeometry(0.15, 0.17, 0.13), M.shoe, s*0.15, 0.03, -0.09, g);
-    const toe = mesh(new THREE.SphereGeometry(0.10, 12, 10), M.shoe, s*0.15, 0.08, 0.19, g);
-    toe.scale.set(1, 0.7, 1);
+    const leg = mesh(new THREE.CapsuleGeometry(0.076, 0.56, 5, 12), M.sock, s*0.135, 0.40, 0, g);
+    const sockTop = mesh(new THREE.TorusGeometry(0.078, 0.018, 6, 14), M.sock, s*0.135, 0.62, 0, g);
+    sockTop.rotation.x = Math.PI/2;
+    const shoeBody = mesh(new THREE.BoxGeometry(0.175, 0.115, 0.30), M.shoe, s*0.135, 0.085, 0.055, g);
+    const heel = mesh(new THREE.CylinderGeometry(0.045, 0.055, 0.15, 10), M.shoe, s*0.135, 0.045, -0.075, g);
+    const toe = mesh(new THREE.SphereGeometry(0.088, 14, 12), M.shoe, s*0.135, 0.085, 0.185, g);
+    toe.scale.set(1, 0.72, 1.05);
+    const strap = mesh(new THREE.TorusGeometry(0.072, 0.014, 6, 14), M.shoe, s*0.135, 0.115, 0.045, g);
+    strap.rotation.x = Math.PI/2;
   }
 
-  return {g, armL, armR, handL, handR, legL:null, legR:null, head, torso};
+  /* ── sırt çantası (kutuyu taşırken görünür) ── */
+  const bag = new THREE.Group();
+  const bagBody = mesh(new THREE.BoxGeometry(0.42, 0.44, 0.20), M.bag, 0, 0, 0, bag);
+  bagBody.geometry = new THREE.BoxGeometry(0.42, 0.44, 0.20, 2, 2, 2);
+  const flap = mesh(new THREE.BoxGeometry(0.43, 0.16, 0.21), M.bagDark, 0, 0.14, 0, bag);
+  const buckle = mesh(new THREE.BoxGeometry(0.05, 0.05, 0.22), M.ribbon, 0, 0.02, 0, bag);
+  // askılar
+  for (const s of [-1,1]){
+    const strap = mesh(new THREE.TorusGeometry(0.16, 0.022, 6, 16, Math.PI*0.9), M.bagDark,
+      s*0.14, 0.16, 0.10, bag);
+    strap.rotation.set(0.2, 0, s*0.25);
+  }
+  bag.position.set(0, 1.28, -0.34);
+  bag.rotation.x = 0.10;
+  g.add(bag);
+
+  return {g, armL, armR, handL, handR, legL:null, legR:null, head, torso, bag};
 }
 
 /* ---------- PASTA KUTUSU ---------- */
@@ -529,6 +731,8 @@ function buildStage(idx){
   for(const c of world.cars) if(c.g) scene.remove(c.g);
   for(const d of world.dogs) if(d.g) scene.remove(d.g);
   for(const s of world.skaters) if(s.g) scene.remove(s.g);
+  world.goal = null;
+  world.wet = null;
   world.solids.length=0; world.hazards.length=0; world.movers.length=0;
   world.checkpoints.length=0; world.crowd.length=0; world.cars.length=0;
   world.dogs.length=0; world.skaters.length=0; world.ramps.length=0;
@@ -735,9 +939,9 @@ function buildHome(){
     scene.add(l);
   }
   checkpoint(X+2, 0);
-  world.goal = {x:X+6, z:0};
+  world.goal = {x:X+5, z:0};
   const goalLight = new THREE.PointLight(0xff5ab0, 40, 30, 2);
-  goalLight.position.set(X+6, 3, 0);
+  goalLight.position.set(X+5, 3, 0);
   scene.add(goalLight);
   stageLen = X + 40;
 }
@@ -878,6 +1082,8 @@ function gameOver(reason){
 }
 function win(){
   state=State.WIN; started=false;
+  el('verdict').textContent = 'ZAMANINDA!';
+  el('verdict').style.color = 'var(--ok)';
   const sc = score + Math.max(0, Math.floor(timeLeft)) * 10;
   score = sc;
   el('wMsg').innerHTML =
@@ -1192,6 +1398,8 @@ function physics(dt){
       c.rotation.x = Math.sin(P.anim + (c.position.x>0?0:Math.PI))*0.75;
     }
   });
+  // sirt cantasi salinimi
+  if(runner.bag) runner.bag.rotation.z = -P.balance*0.12;
   // PASTA KUTUSU salınımı — denge mekaniğinin görseli
   cakeBox.g.rotation.z = -P.balance*0.55;
   cakeBox.g.rotation.x = 0.08 + P.balanceVel*0.05;
@@ -1288,7 +1496,8 @@ function loop(){
   }
   if(steps === 8) acc = 0;   // cok yavas -> birikimi at
   updateCamera(steps ? FIXED*steps : Math.min(raw, 1/30));
-  renderer.render(scene, camera);
+  gradePass.uniforms.uTime.value = performance.now()*0.001;
+  composer.render();
 }
 
 /* Bir simule adim: zaman + fizik + HUD */
@@ -1311,6 +1520,8 @@ addEventListener('resize', ()=>{
   camera.aspect = innerWidth/innerHeight;
   camera.updateProjectionMatrix();
   renderer.setSize(innerWidth, innerHeight);
+  composer.setSize(innerWidth, innerHeight);
+  bloom.setSize(innerWidth, innerHeight);
 });
 addEventListener('keydown', e=>{ if(e.code==='Escape' && state===State.PLAY) pause(); });
 
