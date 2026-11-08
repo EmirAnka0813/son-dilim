@@ -66,17 +66,20 @@ const URL = process.argv[2] || 'http://127.0.0.1:8790/index.html';
   // --- 4) DENGE MEKANIGI: Roblox tarzi Q/E ile pasta egilir ---
   const b0 = d.balance;
   await page.evaluate(() => window.__key('KeyE', true));
-  await page.waitForTimeout(1000);
+  await page.waitForTimeout(1600);
   const bE = await page.evaluate(() => window.__dbg().balance);
   await page.evaluate(() => window.__key('KeyE', false));
-  check('Q/E pastayi egdiriyor', bE > b0 + 0.08, `balance ${b0} -> ${bE}`);
+  check('Q/E pastayi egdiriyor', bE > b0 + 0.15, `balance ${b0} -> ${bE}`);
 
-  // --- 4b) FARE kamerayi dondurur (Roblox tarzi) ---
+  // --- 4b) SAG TUŞ sürükle kamerayi dondurur ---
   const cam0 = await page.evaluate(() => window.__camYaw());
-  await page.mouse.move(1200, 405);
-  await page.waitForTimeout(500);
+  await page.mouse.move(720, 405);
+  await page.mouse.down({ button: 'right' });
+  await page.mouse.move(960, 405, { steps: 12 });
+  await page.waitForTimeout(200);
+  await page.mouse.up({ button: 'right' });
   const cam1 = await page.evaluate(() => window.__camYaw());
-  check('Fare kamerayi donduruyor', Math.abs(cam1 - cam0) > 0.03, `yaw ${cam0} -> ${cam1}`);
+  check('Sag tus kamerayi donduruyor', Math.abs(cam1 - cam0) > 0.15, `yaw ${cam0} -> ${cam1}`);
 
   // --- 5) Denge kazasi (pasta dusmesi) ---
   await page.evaluate(() => window.__crash());
