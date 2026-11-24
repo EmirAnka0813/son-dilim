@@ -1,0 +1,39 @@
+[gd_scene load_steps=7 format=3]
+
+[ext_resource type="Script" path="res://res/scripts/player_controller.gd" id="1_player"]
+[ext_resource type="Script" path="res://res/scripts/balance_system.gd" id="2_balance"]
+[ext_resource type="PackedScene" path="res://res/assets/models/character.glb" id="3_character"]
+[ext_resource type="PackedScene" path="res://res/assets/models/cake_box_open.glb" id="4_cake"]
+[ext_resource type="PackedScene" path="res://res/assets/models/cake_box.glb" id="5_cake_closed"]
+
+[sub_resource type="CapsuleShape3D" id="CapsuleShape3D_body"]
+radius = 0.32
+height = 1.75
+
+[node name="Player" type="CharacterBody3D"]
+collision_layer = 2
+collision_mask = 1
+script = ExtResource("1_player")
+
+[node name="CollisionShape3D" type="CollisionShape3D" parent="."]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0, 0.88, 0)
+shape = SubResource("CapsuleShape3D_body")
+
+[node name="CakeBalance" type="Node" parent="."]
+script = ExtResource("2_balance")
+
+[node name="Body" type="Node3D" parent="."]
+
+[node name="Character" parent="Body" instance=ExtResource("3_character")]
+## Yön düzeltmesi: mesh +Z'ye bakıyor, Godot'ta karakterin ileri yönü -Z.
+## 180° Y yaw → basis: (-1,0,0 / 0,1,0 / 0,0,-1). Determinant +1 (ayna değil),
+## Y ekseni BOZULMAZ — mesh dikey kalır.
+transform = Transform3D(-1, 0, 0, 0, 1, 0, 0, 0, -1, 0, 0, 0)
+
+[node name="CakeBox" type="Node3D" parent="."]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0, 1.26, 0.52)
+
+[node name="Mesh" parent="CakeBox" instance=ExtResource("4_cake")]
+
+[node name="Closed" parent="CakeBox" instance=ExtResource("5_cake_closed")]
+visible = false

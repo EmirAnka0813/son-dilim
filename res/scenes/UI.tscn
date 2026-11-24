@@ -1,0 +1,171 @@
+[gd_scene load_steps=2 format=3]
+
+[ext_resource type="Script" path="res://res/scripts/ui_controller.gd" id="1_ui"]
+
+[node name="UI" type="CanvasLayer"]
+script = ExtResource("1_ui")
+
+[node name="TimerPanel" type="Control" parent="."]
+anchors_preset = 1
+anchor_left = 1.0
+anchor_right = 1.0
+offset_left = -220.0
+offset_top = 18.0
+offset_right = -24.0
+offset_bottom = 78.0
+grow_horizontal = 0
+
+[node name="TimerLabel" type="Label" parent="TimerPanel"]
+anchors_preset = 1
+anchor_left = 1.0
+anchor_right = 1.0
+offset_left = -196.0
+offset_top = 0.0
+offset_right = 0.0
+offset_bottom = 60.0
+grow_horizontal = 0
+theme_override_colors/font_color = Color(1, 1, 1, 1)
+theme_override_colors/font_outline_color = Color(0, 0, 0, 0.85)
+theme_override_constants/outline_size = 8
+theme_override_font_sizes/font_size = 46
+text = "20:00"
+horizontal_alignment = 2
+vertical_alignment = 1
+
+[node name="BalancePanel" type="Control" parent="."]
+anchors_preset = 5
+anchor_left = 0.5
+anchor_right = 0.5
+offset_left = -250.0
+offset_top = 18.0
+offset_right = 250.0
+offset_bottom = 118.0
+grow_horizontal = 2
+
+[node name="BalanceTitle" type="Label" parent="BalancePanel"]
+anchors_preset = 10
+anchor_right = 1.0
+offset_bottom = 22.0
+grow_horizontal = 2
+theme_override_colors/font_color = Color(1, 0.95, 0.85, 1)
+theme_override_colors/font_outline_color = Color(0, 0, 0, 0.8)
+theme_override_constants/outline_size = 6
+theme_override_font_sizes/font_size = 17
+text = "PASTA DENGE"
+horizontal_alignment = 1
+
+[node name="BalanceBar" type="ProgressBar" parent="BalancePanel"]
+anchors_preset = 10
+anchor_right = 1.0
+offset_top = 28.0
+offset_bottom = 56.0
+grow_horizontal = 2
+value = 50.0
+show_percentage = false
+
+[node name="BalanceNeedle" type="ColorRect" parent="BalancePanel"]
+anchors_preset = 10
+offset_left = -3.0
+offset_top = 22.0
+offset_right = 3.0
+offset_bottom = 62.0
+grow_horizontal = 2
+color = Color(1, 1, 1, 1)
+
+[node name="SlipBar" type="ProgressBar" parent="BalancePanel"]
+anchors_preset = 10
+anchor_right = 1.0
+offset_top = 64.0
+offset_bottom = 84.0
+grow_horizontal = 2
+value = 0.0
+show_percentage = false
+
+[node name="SlipLabel" type="Label" parent="BalancePanel"]
+anchors_preset = 10
+anchor_right = 1.0
+offset_top = 86.0
+offset_bottom = 106.0
+grow_horizontal = 2
+theme_override_colors/font_color = Color(1, 1, 1, 0.7)
+theme_override_font_sizes/font_size = 13
+text = "KREM"
+horizontal_alignment = 1
+
+[node name="BalanceHint" type="Label" parent="BalancePanel"]
+anchors_preset = 10
+anchor_right = 1.0
+offset_top = 106.0
+offset_bottom = 126.0
+grow_horizontal = 2
+theme_override_colors/font_color = Color(1, 1, 1, 0.55)
+theme_override_font_sizes/font_size = 13
+text = "Q / E  ·  kutuyu düz tut"
+horizontal_alignment = 1
+
+[node name="CenterMessage" type="Label" parent="."]
+anchors_preset = 8
+anchor_left = 0.5
+anchor_top = 0.5
+anchor_right = 0.5
+anchor_bottom = 0.5
+offset_left = -400.0
+offset_top = -70.0
+offset_right = 400.0
+offset_bottom = 70.0
+grow_horizontal = 2
+grow_vertical = 2
+theme_override_colors/font_color = Color(1, 0.92, 0.6, 1)
+theme_override_colors/font_outline_color = Color(0, 0, 0, 0.9)
+theme_override_constants/outline_size = 12
+theme_override_font_sizes/font_size = 52
+text = ""
+horizontal_alignment = 1
+vertical_alignment = 1
+
+[node name="TopLeft" type="Control" parent="."]
+anchors_preset = 0
+offset_left = 24.0
+offset_top = 18.0
+offset_right = 424.0
+offset_bottom = 90.0
+
+[node name="LevelLabel" type="Label" parent="TopLeft"]
+anchors_preset = 10
+anchor_right = 1.0
+offset_bottom = 26.0
+grow_horizontal = 2
+theme_override_colors/font_color = Color(1, 0.85, 0.45, 1)
+theme_override_colors/font_outline_color = Color(0, 0, 0, 0.85)
+theme_override_constants/outline_size = 6
+theme_override_font_sizes/font_size = 20
+text = "BÖLÜM 1 — OFİSTEN KAÇIŞ"
+
+[node name="ScoreLabel" type="Label" parent="TopLeft"]
+anchors_preset = 10
+anchor_right = 1.0
+offset_top = 30.0
+offset_bottom = 56.0
+grow_horizontal = 2
+theme_override_colors/font_color = Color(1, 1, 1, 0.9)
+theme_override_colors/font_outline_color = Color(0, 0, 0, 0.8)
+theme_override_constants/outline_size = 5
+theme_override_font_sizes/font_size = 17
+text = "SKOR 0"
+
+[node name="BottomHint" type="Label" parent="."]
+anchors_preset = 12
+anchor_right = 1.0
+anchor_bottom = 1.0
+offset_left = 24.0
+offset_top = -46.0
+offset_right = -24.0
+offset_bottom = -16.0
+grow_horizontal = 2
+grow_vertical = 0
+theme_override_colors/font_color = Color(1, 1, 1, 0.62)
+theme_override_colors/font_outline_color = Color(0, 0, 0, 0.8)
+theme_override_constants/outline_size = 5
+theme_override_font_sizes/font_size = 15
+text = "WASD koş · SAĞ FARE kamera · Q/E pasta · SPACE zıpla · SHIFT hızlı · V gözden bak"
+horizontal_alignment = 1

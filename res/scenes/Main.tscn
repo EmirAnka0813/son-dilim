@@ -1,0 +1,35 @@
+[gd_scene load_steps=9 format=3]
+
+[ext_resource type="PackedScene" path="res://res/scenes/Level_Office.tscn" id="1_level"]
+[ext_resource type="PackedScene" path="res://res/scenes/Player.tscn" id="2_player"]
+[ext_resource type="PackedScene" path="res://res/scenes/UI.tscn" id="3_ui"]
+[ext_resource type="Script" path="res://res/scripts/game_manager.gd" id="4_game"]
+[ext_resource type="Script" path="res://res/scripts/main.gd" id="5_main"]
+[ext_resource type="PackedScene" path="res://res/scenes/FinalScreen.tscn" id="6_final"]
+[ext_resource type="PackedScene" path="res://res/scenes/Prologue.tscn" id="7_prologue"]
+[ext_resource type="Script" path="res://res/scripts/camera_pivot.gd" id="8_camera_pivot"]
+
+[node name="Main" type="Node3D"]
+script = ExtResource("5_main")
+
+[node name="GameManager" type="Node" parent="."]
+script = ExtResource("4_game")
+
+[node name="LevelRoot" type="Node3D" parent="."]
+
+[node name="Player" parent="." instance=ExtResource("2_player")]
+
+[node name="CameraPivot" type="Node3D" parent="."]
+script = ExtResource("8_camera_pivot")
+
+[node name="Camera3D" type="Camera3D" parent="CameraPivot"]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0.55, 2.05, 6.4)
+fov = 70.0
+current = true
+
+[node name="UI" parent="." instance=ExtResource("3_ui")]
+
+[node name="FinalScreen" parent="." instance=ExtResource("6_final")]
+visible = false
+
+[node name="Prologue" parent="." instance=ExtResource("7_prologue")]

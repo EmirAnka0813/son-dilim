@@ -1,0 +1,24 @@
+# Godot 4
+.godot/
+/android/
+
+# Export ciktilari (yeniden uretilebilir)
+/build/
+/dist/
+/release/
+*.exe
+*.pck
+*.zip
+
+# NOT: /tools/ VE /release/ BILINCLI OLARAK REPOYA GIRER.
+#   tools/  -> test scriptleri + asset uretim araclari (yeniden uretim icin)
+#   release/ -> calistirilabilir build (kullaniciya teslim)
+# Sadece gecici/gereksiz cikti haric:
+/shots/
+/movie/
+shot_*.png
+prologue-*.png
+
+# Python
+__pycache__/
+*.pyc

@@ -1,0 +1,128 @@
+[gd_scene load_steps=2 format=3]
+
+[ext_resource type="Script" path="res://res/scripts/final_screen.gd" id="1_final"]
+
+[node name="FinalScreen" type="Control"]
+layout_mode = 3
+anchors_preset = 15
+anchor_right = 1.0
+anchor_bottom = 1.0
+grow_horizontal = 2
+grow_vertical = 2
+script = ExtResource("1_final")
+
+[node name="Background" type="ColorRect" parent="."]
+layout_mode = 1
+anchors_preset = 15
+anchor_right = 1.0
+anchor_bottom = 1.0
+grow_horizontal = 2
+grow_vertical = 2
+color = Color(0.055, 0.035, 0.09, 0.96)
+
+[node name="Confetti" type="Control" parent="."]
+layout_mode = 1
+anchors_preset = 15
+anchor_right = 1.0
+anchor_bottom = 1.0
+grow_horizontal = 2
+grow_vertical = 2
+mouse_filter = 2
+
+[node name="Content" type="VBoxContainer" parent="."]
+layout_mode = 1
+anchors_preset = 8
+anchor_left = 0.5
+anchor_top = 0.5
+anchor_right = 0.5
+anchor_bottom = 0.5
+offset_left = -520.0
+offset_top = -300.0
+offset_right = 520.0
+offset_bottom = 300.0
+grow_horizontal = 2
+grow_vertical = 2
+theme_override_constants/separation = 14
+alignment = 1
+
+[node name="TitleLabel" type="Label" parent="Content"]
+layout_mode = 2
+theme_override_colors/font_color = Color(1, 0.824, 0.29, 1)
+theme_override_colors/font_outline_color = Color(0.12, 0.06, 0.02, 0.95)
+theme_override_constants/outline_size = 10
+theme_override_font_sizes/font_size = 54
+text = "İYİ Kİ DOĞDUN DERİN!"
+horizontal_alignment = 1
+pivot_offset = Vector2(520, 33)
+
+[node name="SubtitleLabel" type="Label" parent="Content"]
+layout_mode = 2
+theme_override_colors/font_color = Color(0.92, 0.88, 0.98, 0.9)
+theme_override_font_sizes/font_size = 19
+text = "Pastayı zamanında getirdin. Mumları üflemeye hazırız."
+horizontal_alignment = 1
+autowrap_mode = 2
+
+[node name="PhotoRow" type="HBoxContainer" parent="Content"]
+layout_mode = 2
+size_flags_horizontal = 4
+theme_override_constants/separation = 26
+alignment = 1
+
+[node name="PhotoFrame" type="TextureRect" parent="Content/PhotoRow"]
+visible = false
+custom_minimum_size = Vector2(0, 0)
+layout_mode = 2
+
+[node name="FamilyRow" type="HBoxContainer" parent="Content"]
+layout_mode = 2
+size_flags_horizontal = 4
+theme_override_constants/separation = 30
+alignment = 1
+
+[node name="Bubble" type="PanelContainer" parent="Content"]
+layout_mode = 2
+size_flags_horizontal = 4
+custom_minimum_size = Vector2(420, 0)
+
+[node name="BubbleLabel" type="Label" parent="Content/Bubble"]
+layout_mode = 2
+theme_override_colors/font_color = Color(0.16, 0.08, 0.13, 1)
+theme_override_font_sizes/font_size = 17
+text = "Abi, pastayı getirdin mi?"
+horizontal_alignment = 1
+autowrap_mode = 2
+
+[node name="Stats" type="HBoxContainer" parent="Content"]
+layout_mode = 2
+size_flags_horizontal = 4
+theme_override_constants/separation = 40
+alignment = 1
+
+[node name="ScoreValue" type="Label" parent="Content/Stats"]
+layout_mode = 2
+theme_override_colors/font_color = Color(1, 0.824, 0.29, 1)
+theme_override_font_sizes/font_size = 26
+text = "0"
+horizontal_alignment = 1
+
+[node name="TimeValue" type="Label" parent="Content/Stats"]
+layout_mode = 2
+theme_override_colors/font_color = Color(0.55, 0.85, 1, 1)
+theme_override_font_sizes/font_size = 26
+text = "20:00"
+horizontal_alignment = 1
+
+[node name="Buttons" type="HBoxContainer" parent="Content"]
+layout_mode = 2
+size_flags_horizontal = 4
+theme_override_constants/separation = 20
+alignment = 1
+
+[node name="StatsLabel" type="Label" parent="."]
+visible = false
+layout_mode = 0
+offset_left = 0.0
+offset_top = 0.0
+offset_right = 0.0
+offset_bottom = 0.0
