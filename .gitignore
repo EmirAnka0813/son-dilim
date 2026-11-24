@@ -2,7 +2,7 @@
 .godot/
 /android/
 
-# Export ciktilari (yeniden uretilebilir)
+# Export ciktilari (yeniden uretilebilir -> repoya girmez)
 /build/
 /dist/
 /release/
@@ -10,10 +10,10 @@
 *.pck
 *.zip
 
-# NOT: /tools/ VE /release/ BILINCLI OLARAK REPOYA GIRER.
-#   tools/  -> test scriptleri + asset uretim araclari (yeniden uretim icin)
-#   release/ -> calistirilabilir build (kullaniciya teslim)
-# Sadece gecici/gereksiz cikti haric:
+# NOT: /tools/ BILINCLI OLARAK REPOYA GIRER.
+#   tools/ -> test scriptleri + asset uretim araclari.
+#   Bunlar olmadan proje yeniden uretilemez ve test edilemez.
+# Gecici/gereksiz cikti:
 /shots/
 /movie/
 shot_*.png
