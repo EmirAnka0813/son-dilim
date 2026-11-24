@@ -148,7 +148,11 @@ giriş noktası (`add_box` / `add_sloped_box` / `add_cylinder` / `add_light`).
 
 ---
 
-## 🧪 DOĞRULAMA — 63/63 TEST GEÇİYOR
+## 🧪 DOĞRULAMA — 125/125 TEST GEÇİYOR
+
+> **Tek komut:** `bash tools/run_all_tests.sh` — 9 suite'i ayrı process'lerde
+> çalıştırır, "SONUÇ: g/t" satırlarını okur, toplamı raporlar.
+> (Her suite `timeout 180` ile korunur; biri takılırsa diğerleri yine koşar.)
 
 | Suite | Test | Sonuç |
 |---|---|---|
@@ -160,10 +164,14 @@ giriş noktası (`add_box` / `add_sloped_box` / `add_cylinder` / `add_light`).
 | `test_character.gd` | Karakter ayakta, yüz doğru yönde, pasta elde | **7/7** |
 | `test_game_logic.gd` | **Oyun mantığı** (denge, Q/E, karakter yönü, yokuş) | **20/20** |
 | `test_camera_3d.gd` | **3B kamera** (yükseklik, look_at, pitch, takip) | **10/10** |
-| `--check-only` | 14 script parse kontrolü | **0 hata** |
-| Export | Windows + Linux build + çalıştırma | **hatasız** |
+| `test_final.gd` | **Final ekranı** (normal / komedi / zaman aşımı) | **5/5** |
 
-**TOPLAM: 120/120**
+**TOPLAM: 125/125**
+
+> ⚠️ **Headless notu:** `test_camera_3d` ve `test_character` ekran görüntüsü
+> alır. Godot headless modda `frame_post_draw` beklemesi **asılı** olduğu
+> için bu bloklar `DisplayServer.get_name() == "headless"` kontrolüyle
+> atlanır — grafik modunda normal çalışır.
 
 ### Bot testi (`test_playable.gd`)
 
@@ -192,12 +200,16 @@ blender --background --python tools/build_assets.py
 python tools/make_textures.py
 ```
 
-**Testleri çalıştır:**
+### Testleri çalıştır:
 ```bash
-godot --headless --script res://tools/test_balance.gd
-godot --headless --script res://tools/test_flow.gd
-godot --headless --script res://tools/test_perf.gd
-godot --headless --script res://tools/test_playable.gd
+bash tools/run_all_tests.sh        # TÜM testler (9 suite) + toplam raporu
+```
+Tek suite:
+```bash
+godot --headless --path . --script res://tools/test_balance.gd
+godot --headless --path . --script res://tools/test_flow.gd
+godot --headless --path . --script res://tools/test_perf.gd
+godot --headless --path . --script res://tools/test_playable.gd
 ```
 
 **Görüntü al:**
